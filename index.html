@@ -1,0 +1,2618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ProMEL Analytics Solutions | PMCEL Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    :root {
+      --primary: #003366;
+      --primary-light: #e9f1ff;
+      --bg: #f4f6f9;
+      --card-bg: #ffffff;
+
+      /* Traffic-light colours */
+      --status-good: #0a7a29;
+      --status-warn: #b8860b;
+      --status-bad: #b22222;
+
+      /* Soft backgrounds for KPI tiles */
+      --kpi-good-bg: rgba(10, 122, 41, 0.10);
+      --kpi-warn-bg: rgba(184, 134, 11, 0.12);
+      --kpi-bad-bg: rgba(178, 34, 34, 0.10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: var(--bg);
+      color: #333;
+    }
+
+    /* LOGIN SCREEN */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #003366, #005599);
+      color: #fff;
+      padding: 16px;
+    }
+
+    .login-card {
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 20px 24px;
+      max-width: 360px;
+      width: 100%;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+      backdrop-filter: blur(4px);
+    }
+
+    .login-card h2 { margin: 0 0 8px; font-size: 1.2rem; }
+    .login-card p { margin: 0 0 14px; font-size: 0.85rem; opacity: 0.9; }
+
+    .login-card label {
+      display: block;
+      font-size: 0.8rem;
+      margin-top: 8px;
+    }
+
+    .login-card input {
+      width: 100%;
+      padding: 6px 8px;
+      margin-top: 4px;
+      border-radius: 6px;
+      border: none;
+      font-size: 0.85rem;
+    }
+
+    .login-btn {
+      margin-top: 14px;
+      width: 100%;
+      padding: 8px;
+      border-radius: 8px;
+      border: none;
+      background: #ffcc00;
+      color: #003366;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .login-btn:hover { opacity: 0.95; }
+
+    .login-hint { margin-top: 10px; font-size: 0.75rem; opacity: 0.85; }
+
+    /* APP ROOT */
+    #app-root { display: none; }
+
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 16px;
+      text-align: center;
+    }
+
+    header h1 { margin: 0; font-size: 1.4rem; }
+    header p { margin: 4px 0 0; font-size: 0.9rem; opacity: 0.9; }
+
+    .container {
+      padding: 16px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* FILTER BAR */
+    .filters-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 0.8rem;
+      background: #e9f1ff;
+      padding: 8px 10px;
+      border-radius: 8px;
+    }
+
+    .filters-bar label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .filters-bar select {
+      padding: 4px 6px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 0.8rem;
+      background: #fff;
+    }
+
+    /* Card grid */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 10px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+      font-size: 0.9rem;
+    }
+
+    .card h3 { margin: 0 0 6px; color: var(--primary); font-size: 1rem; }
+    .card p { margin: 0; font-size: 0.8rem; opacity: 0.9; }
+
+    .card:hover { transform: translateY(-2px); background: var(--primary-light); }
+
+    /* Sections */
+    .section {
+      display: none;
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 10px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+    }
+
+    .section h2 { margin-top: 0; color: var(--primary); font-size: 1.1rem; }
+    .section p { margin: 4px 0 10px; font-size: 0.85rem; }
+
+    .close-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-top: 10px;
+    }
+    .close-btn:hover { opacity: 0.9; }
+
+    /* Responsive table wrapper */
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      margin-top: 8px;
+      padding: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      min-width: 480px;
+    }
+
+    th, td {
+      border-bottom: 1px solid #eee;
+      padding: 6px 8px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #eef3fb;
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) td { background: #fafafa; }
+
+    .info-note {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    /* Status colours for numeric ratings */
+    .status-good { color: var(--status-good); font-weight: bold; }
+    .status-warn { color: var(--status-warn); font-weight: bold; }
+    .status-bad  { color: var(--status-bad);  font-weight: bold; }
+
+    .legend { margin-top: 6px; font-size: 0.75rem; }
+    .legend span { margin-right: 12px; }
+
+    footer {
+      background: var(--primary);
+      color: #fff;
+      text-align: center;
+      padding: 10px;
+      font-size: 0.8rem;
+      margin-top: 30px;
+    }
+
+    /* KPI layout for Overview / Reports / Learning */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin: 10px 0 16px;
+    }
+
+    .kpi-box {
+      background: var(--primary-light);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: left;
+    }
+
+    .kpi-label { font-size: 0.75rem; color: #555; margin-bottom: 4px; }
+    .kpi-value { font-size: 1.2rem; font-weight: bold; color: var(--primary); }
+
+    /* KPI traffic-light boxes (Monitoring + Evaluation + Overview) */
+    .kpi-box.kpi-good { background: var(--kpi-good-bg); border: 1px solid rgba(10, 122, 41, 0.25); }
+    .kpi-box.kpi-warn { background: var(--kpi-warn-bg); border: 1px solid rgba(184, 134, 11, 0.28); }
+    .kpi-box.kpi-bad  { background: var(--kpi-bad-bg);  border: 1px solid rgba(178, 34, 34, 0.25); }
+
+    .kpi-value.kpi-good { color: var(--status-good); }
+    .kpi-value.kpi-warn { color: var(--status-warn); }
+    .kpi-value.kpi-bad  { color: var(--status-bad);  }
+
+    /* Learning list */
+    #learning-list {
+      list-style: none;
+      padding-left: 0;
+      margin: 8px 0 0;
+      font-size: 0.8rem;
+    }
+
+    #learning-list li {
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eee;
+    }
+
+    /* Data entry forms */
+    .data-form {
+      background: #f7f9ff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.8rem;
+    }
+
+    .data-form h3 { margin: 0 0 8px; font-size: 0.95rem; color: var(--primary); }
+
+    .data-form label { display: block; margin-top: 6px; font-size: 0.8rem; }
+
+    .data-form input,
+    .data-form select,
+    .data-form textarea {
+      width: 100%;
+      padding: 5px 6px;
+      margin-top: 3px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 0.8rem;
+    }
+
+    .data-form textarea { resize: vertical; min-height: 50px; }
+
+    .data-form button {
+      margin-top: 10px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .data-form button:hover { opacity: 0.9; }
+
+    canvas { max-width: 100%; }
+
+    /* ===========================
+       AI ASSISTANT (OPENAI) UI
+       =========================== */
+
+    .ai-chat-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ai-input-panel,
+    .ai-output-panel {
+      background: #f7f9ff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.85rem;
+    }
+
+    .ai-input-panel h3,
+    .ai-output-panel h3 {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+      color: var(--primary);
+    }
+
+    .ai-input-panel label {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.8rem;
+    }
+
+    .ai-input-panel select,
+    .ai-input-panel textarea {
+      width: 100%;
+      padding: 5px 6px;
+      margin-top: 3px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 0.8rem;
+    }
+
+    .ai-input-panel textarea { resize: vertical; min-height: 80px; }
+
+    .ai-input-panel button {
+      margin-top: 10px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .ai-input-panel button:hover { opacity: 0.9; }
+
+    .ai-inline-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 8px;
+      font-size: 0.8rem;
+    }
+
+    #ai-response-box {
+      background: #ffffff;
+      border-radius: 8px;
+      min-height: 80px;
+      max-height: 320px;
+      overflow-y: auto;
+      padding: 8px;
+      border: 1px solid #dde3f3;
+      white-space: pre-wrap;
+      font-size: 0.8rem;
+    }
+
+    #ai-status { margin-top: 6px; font-size: 0.75rem; color: #555; }
+
+    @media (min-width: 768px) {
+      .ai-chat-container { flex-direction: row; }
+      .ai-input-panel, .ai-output-panel { flex: 1; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-card">
+    <h2>ProMEL Dashboard Login</h2>
+    <p>Secure access to the PMCEL Monitoring, Evaluation &amp; Learning dashboard.</p>
+
+    <form id="login-form">
+      <label for="login-username">Username</label>
+      <input id="login-username" type="text" required>
+
+      <label for="login-password">Password</label>
+      <input id="login-password" type="password" required>
+
+      <button type="submit" class="login-btn">Login</button>
+    </form>
+
+    <div class="login-hint">
+      Default (change later in code):<br>
+      <strong>Username:</strong> <code>admin</code><br>
+      <strong>Password:</strong> <code>ProMEL@2025</code>
+    </div>
+  </div>
+</div>
+
+<!-- APP ROOT -->
+<div id="app-root">
+  <header>
+    <h1>ProMEL Analytics Solutions</h1>
+    <p>Project Monitoring &amp; Control, Evaluation &amp; Learning (PMCEL) Dashboard</p>
+  </header>
+
+  <div class="container">
+
+    <!-- Filters -->
+    <div id="filters-bar" class="filters-bar">
+      <strong>Filters:</strong>
+      <label>
+        Project:
+        <select id="filter-project">
+          <option value="">All</option>
+        </select>
+      </label>
+      <label>
+        Period:
+        <select id="filter-period">
+          <option value="">All</option>
+        </select>
+      </label>
+      <label>
+        Location:
+        <select id="filter-location">
+          <option value="">All</option>
+        </select>
+      </label>
+    </div>
+
+    <!-- Navigation cards -->
+    <div class="cards">
+      <div class="card" onclick="openSection('overview')">
+        <h3>Overview</h3>
+        <p>High-level project performance summary.</p>
+      </div>
+
+      <div class="card" onclick="openSection('monitoring')">
+        <h3>Monitoring &amp; Control</h3>
+        <p>Live data from ProMEL Monitoring Google Sheet (CSV feed).</p>
+      </div>
+
+      <div class="card" onclick="openSection('evaluation')">
+        <h3>Evaluation</h3>
+        <p>Findings and ratings from Evaluation Google Sheet (CSV feed).</p>
+      </div>
+
+      <div class="card" onclick="openSection('learning')">
+        <h3>Learning</h3>
+        <p>Lessons learned &amp; adaptive management.</p>
+      </div>
+
+      <div class="card" onclick="openSection('reports')">
+        <h3>Reports</h3>
+        <p>Monitoring and evaluation reporting hub.</p>
+      </div>
+
+      <div class="card" onclick="openSection('dataentry')">
+        <h3>Data Entry</h3>
+        <p>Quick Monitoring &amp; Evaluation input forms.</p>
+      </div>
+
+      <div class="card" onclick="openSection('powerbi')">
+        <h3>Power BI Dashboard</h3>
+        <p>Integrated business intelligence view.</p>
+      </div>
+
+      <div class="card" onclick="openSection('openai')">
+        <h3>AI Assistant (OpenAI)</h3>
+        <p>Analyse trends &amp; generate MEL reports.</p>
+      </div>
+    </div>
+
+    <!-- Sections -->
+
+    <!-- OVERVIEW -->
+    <div id="overview" class="section">
+      <h2>Project Overview</h2>
+      <p>
+        Live summary of key PMCEL indicators based on Monitoring &amp; Evaluation data.
+        Filters at the top (Project, Period, Location) adjust the figures below.
+      </p>
+
+      <!-- EXISTING OVERVIEW KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-box">
+          <div class="kpi-label">Total Projects</div>
+          <div class="kpi-value" id="ov-total-projects">0</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Total Monitoring Records</div>
+          <div class="kpi-value" id="ov-total-monitoring">0</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Total Evaluation Records</div>
+          <div class="kpi-value" id="ov-total-evaluation">0</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Total Beneficiaries Reached</div>
+          <div class="kpi-value" id="ov-total-beneficiaries">0</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Overall Performance Score (Activity &amp; Budget)</div>
+          <div class="kpi-value" id="ov-overall-score">0</div>
+        </div>
+      </div>
+
+      <!-- ✅ NEW: OVERVIEW KPI TRAFFIC-LIGHT SUMMARY -->
+      <div class="table-wrapper" style="margin-top:12px; padding:10px;">
+        <strong style="font-size:0.85rem;">High Level Project Performance (Traffic-light, auto from filtered data)</strong>
+
+        <div class="kpi-grid" style="margin-top:10px;">
+          <div class="kpi-box" id="ov-kpi-monitoring-box">
+            <div class="kpi-label">Monitoring Overall</div>
+            <div class="kpi-value" id="ov-kpi-monitoring">0%</div>
+          </div>
+          <div class="kpi-box" id="ov-kpi-evalperf-box">
+            <div class="kpi-label">Evaluation Performance</div>
+            <div class="kpi-value" id="ov-kpi-evalperf">0%</div>
+          </div>
+          <div class="kpi-box" id="ov-kpi-outcome-box">
+            <div class="kpi-label">Outcome</div>
+            <div class="kpi-value" id="ov-kpi-outcome">0%</div>
+          </div>
+          <div class="kpi-box" id="ov-kpi-impact-box">
+            <div class="kpi-label">Impact</div>
+            <div class="kpi-value" id="ov-kpi-impact">0%</div>
+          </div>
+          <div class="kpi-box" id="ov-kpi-combined-box">
+            <div class="kpi-label">Combined Project Performance</div>
+            <div class="kpi-value" id="ov-kpi-combined">0%</div>
+          </div>
+        </div>
+
+        <div class="kpi-grid" style="margin-top:6px;">
+          <div class="table-wrapper" style="margin:0; padding:8px;">
+            <strong style="font-size:0.8rem;">Performance KPI % Summary</strong>
+            <canvas id="ov-kpi-bar"></canvas>
+          </div>
+          <div class="table-wrapper" style="margin:0; padding:8px;">
+            <strong style="font-size:0.8rem;">Overall Distribution (Monitoring + Evaluation)</strong>
+            <canvas id="ov-kpi-donut"></canvas>
+          </div>
+        </div>
+
+        <div class="legend" style="margin-top:10px;">
+          <strong>Traffic-light key:</strong>
+          <span class="status-bad">0–40% Off-track / Poor</span>
+          <span class="status-warn">41–60% Moderate / Watch</span>
+          <span class="status-good">61–100% On-track / Good</span>
+        </div>
+      </div>
+
+      <div class="table-wrapper" style="margin-top:12px;">
+        <canvas id="chart-avg-ratings"></canvas>
+      </div>
+
+      <div class="table-wrapper" style="margin-top:12px;">
+        <canvas id="chart-beneficiaries"></canvas>
+      </div>
+
+      <button class="close-btn" onclick="closeSection('overview')">Close</button>
+    </div>
+
+    <!-- MONITORING -->
+    <div id="monitoring" class="section">
+      <h2>Monitoring &amp; Control – Live CSV Feed</h2>
+      <p>
+        The table below is populated from the ProMEL Monitoring Google Sheet published as a CSV link.
+        It is designed to be mobile friendly and scrollable on small screens. Filters at the top will
+        also reduce this table to the selected project/period/location.
+      </p>
+
+      <!-- Monitoring KPI Summary -->
+      <div class="table-wrapper" style="margin-top:12px; padding:10px;">
+        <strong style="font-size:0.85rem;">Monitoring KPIs (Traffic-light, auto from filtered data)</strong>
+
+        <div class="kpi-grid" style="margin-top:10px;">
+          <div class="kpi-box" id="mon-kpi-activity-box">
+            <div class="kpi-label">Activity Implementation</div>
+            <div class="kpi-value" id="mon-kpi-activity">0%</div>
+          </div>
+          <div class="kpi-box" id="mon-kpi-budget-box">
+            <div class="kpi-label">Budget Utilization</div>
+            <div class="kpi-value" id="mon-kpi-budget">0%</div>
+          </div>
+          <div class="kpi-box" id="mon-kpi-staff-box">
+            <div class="kpi-label">Staff Availability</div>
+            <div class="kpi-value" id="mon-kpi-staff">0%</div>
+          </div>
+          <div class="kpi-box" id="mon-kpi-community-box">
+            <div class="kpi-label">Community Participation</div>
+            <div class="kpi-value" id="mon-kpi-community">0%</div>
+          </div>
+          <div class="kpi-box" id="mon-kpi-coordination-box">
+            <div class="kpi-label">Coordination with Partners</div>
+            <div class="kpi-value" id="mon-kpi-coordination">0%</div>
+          </div>
+          <div class="kpi-box" id="mon-kpi-overall-box">
+            <div class="kpi-label">Overall Monitoring Performance</div>
+            <div class="kpi-value" id="mon-kpi-overall">0%</div>
+          </div>
+        </div>
+
+        <div class="kpi-grid" style="margin-top:6px;">
+          <div class="table-wrapper" style="margin:0; padding:8px;">
+            <strong style="font-size:0.8rem;">KPI % by Category</strong>
+            <canvas id="mon-kpi-bar"></canvas>
+          </div>
+          <div class="table-wrapper" style="margin:0; padding:8px;">
+            <strong style="font-size:0.8rem;">Record Distribution (Overall)</strong>
+            <canvas id="mon-kpi-donut"></canvas>
+          </div>
+        </div>
+
+        <div class="legend" style="margin-top:10px;">
+          <strong>Traffic-light key:</strong>
+          <span class="status-bad">0–40% Off-track / Poor</span>
+          <span class="status-warn">41–60% Moderate / Watch</span>
+          <span class="status-good">61–100% On-track / Good</span>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead id="monitoring-head"></thead>
+          <tbody id="monitoring-body"></tbody>
+        </table>
+      </div>
+
+      <!-- Monitoring Summary Graphs -->
+      <div class="table-wrapper" style="margin-top:12px;">
+        <div class="info-note" style="margin:6px 4px 10px;">
+          <strong>Monitoring Summary Graphs</strong> (auto from filtered table)
+          &nbsp;|&nbsp;
+          Group by:
+          <select id="mon-groupby" style="padding:4px 6px; border-radius:6px; border:1px solid #ccc;">
+            <option value="period" selected>Reporting Period</option>
+            <option value="month">Month (from Reporting Date)</option>
+          </select>
+        </div>
+        <canvas id="mon-chart-overall-by-group"></canvas>
+      </div>
+
+      <div class="table-wrapper" style="margin-top:12px;">
+        <canvas id="mon-chart-beneficiaries-by-group"></canvas>
+      </div>
+
+      <div class="legend">
+        <strong>Monitoring rating colour key (1–5):</strong>
+        <span class="status-bad">1–2 = Off-track / Poor</span>
+        <span class="status-warn">3 = Moderate / Watch</span>
+        <span class="status-good">4–5 = On-track / Good</span>
+      </div>
+
+      <div class="info-note">
+        On mobile, swipe left/right to view all columns.
+      </div>
+
+      <button class="close-btn" onclick="closeSection('monitoring')">Close</button>
+    </div>
+
+    <!-- EVALUATION -->
+    <div id="evaluation" class="section">
+      <h2>Evaluation – Live CSV Feed</h2>
+      <p>
+        The table below is populated from the Evaluation Google Sheet published as a CSV link.
+        It provides an overview of evaluation phase, overall rating, key findings and recommendations.
+        Filters at the top adjust this table as well.
+      </p>
+
+      <div class="table-wrapper" style="margin-top:12px; padding:10px;">
+        <strong style="font-size:0.85rem;">Evaluation KPIs (Traffic-light, auto from filtered data)</strong>
+
+        <div class="kpi-grid" style="margin-top:10px;">
+          <div class="kpi-box" id="ev-kpi-outcome-box">
+            <div class="kpi-label">Overall Outcome Rating</div>
+            <div class="kpi-value" id="ev-kpi-outcome">0%</div>
+          </div>
+          <div class="kpi-box" id="ev-kpi-impact-box">
+            <div class="kpi-label">Overall Impact Rating</div>
+            <div class="kpi-value" id="ev-kpi-impact">0%</div>
+          </div>
+          <div class="kpi-box" id="ev-kpi-performance-box">
+            <div class="kpi-label">Overall Project Performance</div>
+            <div class="kpi-value" id="ev-kpi-performance">0%</div>
+          </div>
+          <div class="kpi-box" id="ev-kpi-records-box">
+            <div class="kpi-label">Evaluation Records (Filtered)</div>
+            <div class="kpi-value" id="ev-kpi-records">0</div>
+          </div>
+        </div>
+
+        <div class="kpi-grid" style="margin-top:6px;">
+          <div class="table-wrapper" style="margin:0; padding:8px;">
+            <strong style="font-size:0.8rem;">KPI % Summary</strong>
+            <canvas id="eval-kpi-bar"></canvas>
+          </div>
+          <div class="table-wrapper" style="margin:0; padding:8px;">
+            <strong style="font-size:0.8rem;">Record Distribution (Performance)</strong>
+            <canvas id="eval-kpi-donut"></canvas>
+          </div>
+        </div>
+
+        <div class="legend" style="margin-top:10px;">
+          <strong>Traffic-light key:</strong>
+          <span class="status-bad">0–40% Off-track / Poor</span>
+          <span class="status-warn">41–60% Moderate / Watch</span>
+          <span class="status-good">61–100% On-track / Good</span>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead id="evaluation-head"></thead>
+          <tbody id="evaluation-body"></tbody>
+        </table>
+      </div>
+
+      <div class="table-wrapper" style="margin-top:12px;">
+        <strong style="font-size:0.85rem;">Evaluation Summary – Average Ratings</strong>
+        <canvas id="eval-chart-ratings"></canvas>
+      </div>
+
+      <div class="legend">
+        <strong>Evaluation rating colour key (1–5):</strong>
+        <span class="status-bad">1–2 = Weak / Unsatisfactory</span>
+        <span class="status-warn">3 = Fair / Needs improvement</span>
+        <span class="status-good">4–5 = Good / Strong</span>
+      </div>
+
+      <div class="info-note">
+        On mobile, swipe left/right to view all columns.
+      </div>
+
+      <button class="close-btn" onclick="closeSection('evaluation')">Close</button>
+    </div>
+
+    <!-- LEARNING -->
+    <div id="learning" class="section">
+      <h2>Learning &amp; Knowledge</h2>
+      <p>
+        Recent achievements, challenges and management recommendations from Monitoring data,
+        filtered by the selections at the top.
+      </p>
+
+      <ul id="learning-list"></ul>
+
+      <button class="close-btn" onclick="closeSection('learning')">Close</button>
+    </div>
+
+    <!-- REPORTS -->
+    <div id="reports" class="section">
+      <h2>Reports</h2>
+      <p>
+        Live reporting status from Monitoring records. You can also export a quick PDF summary
+        of the Overview KPIs for management or donors.
+      </p>
+
+      <div class="kpi-grid">
+        <div class="kpi-box">
+          <div class="kpi-label">Total Reports Submitted</div>
+          <div class="kpi-value" id="rep-total">0</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Latest Reporting Period</div>
+          <div class="kpi-value" id="rep-period">N/A</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Latest Reporting Date</div>
+          <div class="kpi-value" id="rep-date">N/A</div>
+        </div>
+      </div>
+
+      <button class="close-btn" onclick="generatePDFReport()">Download PDF Summary</button>
+      <button class="close-btn" style="margin-left:6px;" onclick="closeSection('reports')">Close</button>
+    </div>
+
+    <!-- DATA ENTRY -->
+    <div id="dataentry" class="section">
+      <h2>Data Entry (Monitoring &amp; Evaluation)</h2>
+      <p>
+        These forms are a front-end template. To send data directly into Google Sheets, connect
+        them to a Google Apps Script Web App or Google Form endpoint in the JavaScript code.
+      </p>
+
+      <div class="kpi-grid">
+        <form id="monitoring-entry-form" class="data-form">
+          <h3>Monitoring Input</h3>
+          <label>Project Name <input name="projectName" required></label>
+          <label>Reporting Period <input name="reportingPeriod" placeholder="e.g. Quarter 4, 2025" required></label>
+          <label>Province / District / Location <input name="location"></label>
+          <label>Activity Implementation on Schedule (1–5) <input name="activityRating" type="number" min="1" max="5"></label>
+          <label>Budget Utilization as Planned (1–5) <input name="budgetRating" type="number" min="1" max="5"></label>
+          <label>Staff Availability (1–5) <input name="staffRating" type="number" min="1" max="5"></label>
+          <label>Community Participation (1–5) <input name="communityRating" type="number" min="1" max="5"></label>
+          <label>Coordination with Partners (1–5) <input name="coordinationRating" type="number" min="1" max="5"></label>
+          <label>Number of Beneficiaries Reached <input name="beneficiaries" type="number" min="0"></label>
+          <label>Main Achievements this Period <textarea name="achievements"></textarea></label>
+          <label>Key Challenges / Risks <textarea name="challenges"></textarea></label>
+          <label>Immediate Actions / Recommendations <textarea name="actions"></textarea></label>
+          <button type="submit">Submit Monitoring Entry (Demo)</button>
+        </form>
+
+        <form id="evaluation-entry-form" class="data-form">
+          <h3>Evaluation Input</h3>
+          <label>Project Name <input name="evalProjectName" required></label>
+          <label>Evaluation Phase <input name="evalPhase" placeholder="Mid-term / Final / Review"></label>
+          <label>Outcome Rating (1–5) <input name="outcomeRating" type="number" min="1" max="5"></label>
+          <label>Impact Rating (1–5) <input name="impactRating" type="number" min="1" max="5"></label>
+          <label>Key Findings <textarea name="findings"></textarea></label>
+          <label>Recommendations <textarea name="evalRecommendations"></textarea></label>
+          <button type="submit">Submit Evaluation Entry (Demo)</button>
+        </form>
+      </div>
+
+      <button class="close-btn" onclick="closeSection('dataentry')">Close</button>
+    </div>
+
+    <!-- POWER BI -->
+    <div id="powerbi" class="section">
+      <h2>Power BI Dashboard</h2>
+      <p>
+        When your Power BI report is ready and published, you can embed it here using an
+        &lt;iframe&gt; from Power BI.
+      </p>
+
+      <div class="table-wrapper" style="text-align:center; padding:16px; border-style:dashed;">
+        Power BI embed placeholder.<br>
+        Replace this box with the Power BI &lt;iframe&gt; when available.
+      </div>
+
+      <button class="close-btn" onclick="closeSection('powerbi')">Close</button>
+    </div>
+
+    <!-- OPENAI ASSISTANT -->
+    <div id="openai" class="section">
+      <h2>AI Assistant (OpenAI) – ProMEL Reasoning &amp; Reports</h2>
+      <p>
+        Use this assistant to interpret Monitoring &amp; Evaluation data, explain trends, and draft
+        narrative reports for donors or management. It sends your prompt and selected dashboard context
+        to a backend API endpoint.
+      </p>
+
+      <div class="ai-chat-container">
+        <div class="ai-input-panel">
+          <h3>Ask ProMEL AI</h3>
+
+          <label for="ai-mode">Analysis focus</label>
+          <select id="ai-mode">
+            <option value="explain_trends">Explain current trends & risks</option>
+            <option value="draft_report">Draft narrative report (Monitoring & Evaluation)</option>
+            <option value="learning_summary">Summarise key lessons & recommendations</option>
+            <option value="design_questions">Design MEL questions / indicators</option>
+            <option value="custom">Custom analysis</option>
+          </select>
+
+          <label for="ai-prompt">Prompt / question</label>
+          <textarea
+            id="ai-prompt"
+            placeholder="e.g. Explain the current status of the project based on the latest Monitoring & Evaluation data and highlight any critical risks."
+          ></textarea>
+
+          <div class="ai-inline-checkbox">
+            <input type="checkbox" id="ai-include-filters" checked>
+            <label for="ai-include-filters">Include current filters & KPI summary in analysis</label>
+          </div>
+
+          <button type="button" onclick="sendToAIAssistant()">Ask ProMEL AI</button>
+          <div id="ai-status" class="info-note"></div>
+        </div>
+
+        <!-- ✅ UPDATED (A): Output panel now includes AI visuals canvases -->
+        <div class="ai-output-panel">
+          <h3>AI Response</h3>
+          <div id="ai-response-box"></div>
+
+          <!-- ✅ NEW: AI VISUALS (auto-rendered if backend returns chart JSON) -->
+          <div style="margin-top:10px;">
+            <div class="table-wrapper" style="margin:0; padding:8px;">
+              <strong style="font-size:0.8rem;">AI Visual 1: Key KPI Scores (Traffic-light)</strong>
+              <canvas id="ai-vis-kpi-bar"></canvas>
+              <div class="info-note" style="margin-top:6px;">
+                Red = Off-track, Yellow = Watch, Green = On-track.
+              </div>
+            </div>
+
+            <div class="table-wrapper" style="margin-top:10px; padding:8px;">
+              <strong style="font-size:0.8rem;">AI Visual 2: Record Distribution (Good/Watch/Poor)</strong>
+              <canvas id="ai-vis-distribution-donut"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="close-btn" onclick="closeSection('openai')">Close</button>
+    </div>
+
+  </div>
+
+  <footer>
+    &copy; 2025 ProMEL Analytics Solutions | Digital PMCEL System
+  </footer>
+</div>
+
+<!-- External libraries -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+  // ===========================
+  // CONFIG: AI BACKEND ENDPOINT (ONLINE - RAILWAY)
+  // ===========================
+  // ✅ IMPORTANT: use the full endpoint path (not localhost)
+  const AI_API_URL = "https://promel-ai-backend-production.up.railway.app/api/pas-ai-chat";
+
+  let monitoringRows = [];
+  let evaluationRows = [];
+  let monitoringFilteredRows = [];
+  let evaluationFilteredRows = [];
+  let filtersInitialized = false;
+
+  let avgRatingsChart = null;
+  let beneficiariesChart = null;
+
+  let monOverallByGroupChart = null;
+  let monBenefByGroupChart = null;
+
+  let evalRatingsChart = null;
+
+  // KPI traffic-light charts
+  let monKpiBarChart = null;
+  let monKpiDonutChart = null;
+  let evalKpiBarChart = null;
+  let evalKpiDonutChart = null;
+
+  // ✅ NEW: Overview traffic-light charts
+  let ovKpiBarChart = null;
+  let ovKpiDonutChart = null;
+
+  // ===========================
+  // LOGIN & INIT
+  // ===========================
+  document.addEventListener('DOMContentLoaded', function () {
+    const loginScreen = document.getElementById('login-screen');
+    const appRoot = document.getElementById('app-root');
+    const loginForm = document.getElementById('login-form');
+
+    const isLoggedIn = localStorage.getItem('promelLoggedIn') === 'true';
+
+    if (isLoggedIn) {
+      loginScreen.style.display = 'none';
+      appRoot.style.display = 'block';
+      initApp();
+    } else {
+      loginScreen.style.display = 'flex';
+      appRoot.style.display = 'none';
+    }
+
+    if (loginForm) {
+      loginForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const user = document.getElementById('login-username').value.trim();
+        const pass = document.getElementById('login-password').value.trim();
+
+        if (user === 'admin' && pass === 'ProMEL@2025') {
+          localStorage.setItem('promelLoggedIn', 'true');
+          loginScreen.style.display = 'none';
+          appRoot.style.display = 'block';
+          initApp();
+        } else {
+          alert('Invalid username or password.\n\nUse:\nUsername: admin\nPassword: ProMEL@2025');
+        }
+      });
+    }
+  });
+
+  function initApp() {
+    loadMonitoringTable();
+    loadEvaluationTable();
+    setupFilterListeners();
+    setupDataEntryForms();
+    setupAutoRefresh();
+  }
+
+  function setupAutoRefresh() {
+    setInterval(() => {
+      loadMonitoringTable();
+      loadEvaluationTable();
+    }, 60000);
+  }
+
+  function openSection(id) {
+    document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  function closeSection(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  }
+
+  // ===== CSV LOADERS =====
+  function loadMonitoringTable() {
+    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQKiND_eb3gPR0spQHucadf14xH_rX5gRtpHShan_OWJqSThbHrcx8tqCa4V_3nXjqq3duum0i6XCSE/pub?gid=1298321526&single=true&output=csv";
+
+    fetch(csvUrl)
+      .then(response => {
+        if (!response.ok) throw new Error("HTTP " + response.status + " when fetching " + csvUrl);
+        return response.text();
+      })
+      .then(text => {
+        const rows = parseCSV(text);
+        if (!rows || rows.length === 0) throw new Error("Monitoring CSV file is empty or could not be parsed.");
+
+        monitoringRows = rows;
+        buildMonitoringFilters();
+        applyFilters();
+      })
+      .catch(err => {
+        console.error("Error loading Monitoring CSV:", err);
+        const tbody = document.getElementById('monitoring-body');
+        if (tbody) {
+          tbody.innerHTML = "";
+          const tr = document.createElement('tr');
+          const td = document.createElement('td');
+          td.colSpan = 4;
+          td.textContent = "Error loading monitoring data: " + err.message;
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+        }
+      });
+  }
+
+  function loadEvaluationTable() {
+    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTd_zFcgy_c_5JDgK9wTVFLi5WeHTPF4uQBq9cOPl8vurc2DVu3DWrqwXiE1FmGcL5f2TtWjWLlGs1L/pub?gid=1608876672&single=true&output=csv";
+
+    fetch(csvUrl)
+      .then(response => {
+        if (!response.ok) throw new Error("HTTP " + response.status + " when fetching " + csvUrl);
+        return response.text();
+      })
+      .then(text => {
+        const rows = parseCSV(text);
+        if (!rows || rows.length === 0) throw new Error("Evaluation CSV file is empty or could not be parsed.");
+
+        evaluationRows = rows;
+        applyFilters();
+      })
+      .catch(err => {
+        console.error("Error loading Evaluation CSV:", err);
+        const tbody = document.getElementById('evaluation-body');
+        if (tbody) {
+          tbody.innerHTML = "";
+          const tr = document.createElement('tr');
+          const td = document.createElement('td');
+          td.colSpan = 4;
+          td.textContent = "Error loading evaluation data: " + err.message;
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+        }
+      });
+  }
+
+  // CSV parser (handles commas inside quotes)
+  function parseCSV(text) {
+    const rows = [];
+    let row = [];
+    let current = "";
+    let inQuotes = false;
+
+    const s = (text || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+    for (let i = 0; i < s.length; i++) {
+      const ch = s[i];
+      const next = s[i + 1];
+
+      if (ch === '"' && inQuotes && next === '"') {
+        current += '"';
+        i++;
+        continue;
+      }
+
+      if (ch === '"') {
+        inQuotes = !inQuotes;
+        continue;
+      }
+
+      if (ch === ',' && !inQuotes) {
+        row.push(current);
+        current = "";
+        continue;
+      }
+
+      if (ch === '\n' && !inQuotes) {
+        row.push(current);
+        rows.push(row);
+        row = [];
+        current = "";
+        continue;
+      }
+
+      current += ch;
+    }
+
+    if (current.length || row.length) {
+      row.push(current);
+      rows.push(row);
+    }
+
+    return rows.map(r => r.map(c => (c === undefined ? "" : String(c))));
+  }
+
+  // ===== FILTERS =====
+  function setupFilterListeners() {
+    if (filtersInitialized) return;
+
+    const projSel = document.getElementById('filter-project');
+    const periodSel = document.getElementById('filter-period');
+    const locSel = document.getElementById('filter-location');
+
+    function onChange() { applyFilters(); }
+
+    if (projSel) projSel.addEventListener('change', onChange);
+    if (periodSel) periodSel.addEventListener('change', onChange);
+    if (locSel) locSel.addEventListener('change', onChange);
+
+    filtersInitialized = true;
+  }
+
+  function buildMonitoringFilters() {
+    if (!monitoringRows.length) return;
+
+    const headerRow = monitoringRows[0];
+    const headersLower = headerRow.map(h => h.trim().toLowerCase());
+
+    const idxProject = headersLower.indexOf('project name');
+    const idxPeriod = headersLower.indexOf('reporting period');
+    const idxLocation = headersLower.indexOf('province / district / location');
+
+    const projSel = document.getElementById('filter-project');
+    const periodSel = document.getElementById('filter-period');
+    const locSel = document.getElementById('filter-location');
+    if (!projSel || !periodSel || !locSel) return;
+
+    const currentProj = projSel.value;
+    const currentPeriod = periodSel.value;
+    const currentLoc = locSel.value;
+
+    const projects = new Set();
+    const periods = new Set();
+    const locations = new Set();
+
+    const dataRows = monitoringRows.slice(1).filter(r => !r.every(c => c.trim() === ""));
+
+    dataRows.forEach(row => {
+      if (idxProject !== -1 && row[idxProject]) projects.add(row[idxProject].trim());
+      if (idxPeriod !== -1 && row[idxPeriod]) periods.add(row[idxPeriod].trim());
+      if (idxLocation !== -1 && row[idxLocation]) locations.add(row[idxLocation].trim());
+    });
+
+    function refillSelect(select, values, currentVal) {
+      const oldVal = currentVal;
+      select.innerHTML = "";
+      const allOpt = document.createElement('option');
+      allOpt.value = "";
+      allOpt.textContent = "All";
+      select.appendChild(allOpt);
+      Array.from(values).sort().forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        select.appendChild(opt);
+      });
+      if (oldVal && values.has(oldVal)) select.value = oldVal;
+      else select.value = "";
+    }
+
+    refillSelect(projSel, projects, currentProj);
+    refillSelect(periodSel, periods, currentPeriod);
+    refillSelect(locSel, locations, currentLoc);
+  }
+
+  function applyFilters() {
+    const projSel = document.getElementById('filter-project');
+    const periodSel = document.getElementById('filter-period');
+    const locSel = document.getElementById('filter-location');
+
+    const project = projSel ? projSel.value : "";
+    const period = periodSel ? periodSel.value : "";
+    const location = locSel ? locSel.value : "";
+
+    monitoringFilteredRows = filterMonitoringRows(monitoringRows, project, period, location);
+    evaluationFilteredRows = filterEvaluationRows(evaluationRows, project, period);
+
+    const monitorForView = monitoringFilteredRows.length ? monitoringFilteredRows : monitoringRows;
+    const evalForView = evaluationFilteredRows.length ? evaluationFilteredRows : evaluationRows;
+
+    renderMonitoringTable(monitorForView);
+    renderEvaluationTable(evalForView);
+
+    updateOverviewCard(monitorForView, evalForView);
+    updateLearningCard(monitorForView);
+    updateReportsCard(monitorForView);
+    updateCharts(monitorForView);
+
+    updateMonitoringSummaryCharts(monitorForView);
+    updateEvaluationCharts(evalForView);
+
+    updateMonitoringKPIs(monitorForView);
+    updateEvaluationKPIs(evalForView);
+
+    // ✅ NEW: Overview traffic-light KPIs + charts
+    updateOverviewKPIs(monitorForView, evalForView);
+  }
+
+  function filterMonitoringRows(allRows, project, period, location) {
+    if (!allRows.length || allRows.length <= 1) return [];
+
+    const headerRow = allRows[0];
+    const headersLower = headerRow.map(h => h.trim().toLowerCase());
+
+    const idxProject = headersLower.indexOf('project name');
+    const idxPeriod = headersLower.indexOf('reporting period');
+    const idxLocation = headersLower.indexOf('province / district / location');
+
+    const filteredDataRows = allRows.slice(1).filter(row => {
+      if (row.every(c => c.trim() === "")) return false;
+      const p = idxProject !== -1 ? (row[idxProject] || '').trim() : '';
+      const per = idxPeriod !== -1 ? (row[idxPeriod] || '').trim() : '';
+      const loc = idxLocation !== -1 ? (row[idxLocation] || '').trim() : '';
+
+      const matchProj = project ? p === project : true;
+      const matchPer = period ? per === period : true;
+      const matchLoc = location ? loc === location : true;
+      return matchProj && matchPer && matchLoc;
+    });
+
+    if (!filteredDataRows.length) return [];
+    return [headerRow].concat(filteredDataRows);
+  }
+
+  function filterEvaluationRows(allRows, project, period) {
+    if (!allRows.length || allRows.length <= 1) return [];
+
+    const headerRow = allRows[0];
+    const headersLower = headerRow.map(h => h.trim().toLowerCase());
+
+    const idxProject = headersLower.indexOf('project name');
+    const idxPeriod = headersLower.indexOf('reporting period');
+
+    const filteredDataRows = allRows.slice(1).filter(row => {
+      if (row.every(c => c.trim() === "")) return false;
+      const p = idxProject !== -1 ? (row[idxProject] || '').trim() : '';
+      const per = idxPeriod !== -1 ? (row[idxPeriod] || '').trim() : '';
+
+      const matchProj = project ? p === project : true;
+      const matchPer = period ? per === period : true;
+      return matchProj && matchPer;
+    });
+
+    if (!filteredDataRows.length) return [];
+    return [headerRow].concat(filteredDataRows);
+  }
+
+  // ===== TABLE RENDERERS =====
+  function renderMonitoringTable(rows) {
+    const thead = document.getElementById('monitoring-head');
+    const tbody = document.getElementById('monitoring-body');
+    if (!thead || !tbody) return;
+
+    thead.innerHTML = "";
+    tbody.innerHTML = "";
+
+    if (!rows || !rows.length) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 4;
+      td.textContent = "No monitoring records found for current filter selection.";
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+
+    const headerRow = document.createElement('tr');
+    rows[0].forEach(cell => {
+      const th = document.createElement('th');
+      th.textContent = cell;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+
+    const headerNames = rows[0].map(h => h.trim().toLowerCase());
+    const ratingHeaders = [
+      "activity implementation on schedule",
+      "budget utilization as planned",
+      "staff availability",
+      "community participation",
+      "coordination with partners"
+    ];
+    const ratingIndices = [];
+
+    headerNames.forEach((name, idx) => {
+      ratingHeaders.forEach(target => {
+        if (name === target) ratingIndices.push(idx);
+      });
+    });
+
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      if (row.every(c => c.trim() === "")) continue;
+
+      const tr = document.createElement('tr');
+
+      row.forEach((cell, idx) => {
+        const td = document.createElement('td');
+        const text = (cell || "").trim();
+        td.textContent = text;
+
+        if (ratingIndices.includes(idx) && text !== "") {
+          const value = parseFloat(text);
+          if (!isNaN(value)) {
+            if (value >= 4) td.classList.add("status-good");
+            else if (value <= 2) td.classList.add("status-bad");
+            else if (value === 3) td.classList.add("status-warn");
+          }
+        }
+
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    }
+  }
+
+  function renderEvaluationTable(rows) {
+    const thead = document.getElementById('evaluation-head');
+    const tbody = document.getElementById('evaluation-body');
+    if (!thead || !tbody) return;
+
+    thead.innerHTML = "";
+    tbody.innerHTML = "";
+
+    if (!rows || !rows.length) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 4;
+      td.textContent = "No evaluation records found for current filter selection.";
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+
+    const headerRow = document.createElement('tr');
+    rows[0].forEach(cell => {
+      const th = document.createElement('th');
+      th.textContent = cell;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+
+    const headerNames = rows[0].map(h => h.trim().toLowerCase());
+    let ratingIndex = -1;
+    headerNames.forEach((name, idx) => {
+      if (name.includes("rating") && ratingIndex === -1) ratingIndex = idx;
+    });
+
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      if (row.every(c => c.trim() === "")) continue;
+
+      const tr = document.createElement('tr');
+
+      row.forEach((cell, idx) => {
+        const td = document.createElement('td');
+        const text = (cell || "").trim();
+        td.textContent = text;
+
+        if (ratingIndex === idx && text !== "") {
+          const value = parseFloat(text);
+          if (!isNaN(value)) {
+            if (value >= 4) td.classList.add("status-good");
+            else if (value <= 2) td.classList.add("status-bad");
+            else if (value === 3) td.classList.add("status-warn");
+          }
+        }
+
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    }
+  }
+
+  // ===== KPI / CARD HELPERS =====
+  function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  }
+
+  function averageFieldFromRows(rows, headerRow, headerNameLower) {
+    if (!rows.length || !headerRow.length) return 0;
+    const headers = headerRow.map(h => h.trim().toLowerCase());
+    const idx = headers.indexOf(headerNameLower);
+    if (idx === -1) return 0;
+
+    let sum = 0;
+    let count = 0;
+
+    for (let i = 1; i < rows.length; i++) {
+      const cell = rows[i][idx];
+      const v = parseFloat(cell);
+      if (!isNaN(v)) { sum += v; count++; }
+    }
+
+    return count ? sum / count : 0;
+  }
+
+  // ===== OVERVIEW CARD (existing counters) =====
+  function updateOverviewCard(monitorRows, evalRows) {
+    if (!monitorRows || !monitorRows.length) return;
+
+    const headerRow = monitorRows[0];
+    const headersLower = headerRow.map(h => h.trim().toLowerCase());
+
+    const idxProject = headersLower.indexOf('project name');
+    const idxBenef   = headersLower.indexOf('number of beneficiaries reached this period.');
+    const idxAct     = headersLower.indexOf('activity implementation on schedule');
+    const idxBud     = headersLower.indexOf('budget utilization as planned');
+
+    const projectSet = new Set();
+    let totalBeneficiaries = 0;
+    let monCount = 0;
+
+    for (let i = 1; i < monitorRows.length; i++) {
+      const row = monitorRows[i];
+      if (row.every(c => c.trim() === "")) continue;
+
+      monCount++;
+
+      if (idxProject !== -1 && row[idxProject]) projectSet.add(row[idxProject].trim());
+
+      if (idxBenef !== -1 && row[idxBenef] !== undefined) {
+        const b = parseFloat(row[idxBenef]);
+        if (!isNaN(b)) totalBeneficiaries += b;
+      }
+    }
+
+    const totalMonitoring = monCount;
+    const totalEvaluation = evalRows && evalRows.length > 1 ? (evalRows.length - 1) : 0;
+
+    const avgActivity = idxAct !== -1
+      ? averageFieldFromRows(monitorRows, headerRow, 'activity implementation on schedule')
+      : 0;
+
+    const avgBudget = idxBud !== -1
+      ? averageFieldFromRows(monitorRows, headerRow, 'budget utilization as planned')
+      : 0;
+
+    const overallScore = (avgActivity || avgBudget)
+      ? ((avgActivity + avgBudget) / 2).toFixed(1)
+      : "0";
+
+    setText('ov-total-projects', projectSet.size);
+    setText('ov-total-monitoring', totalMonitoring);
+    setText('ov-total-evaluation', totalEvaluation);
+    setText('ov-total-beneficiaries', totalBeneficiaries);
+    setText('ov-overall-score', overallScore);
+  }
+
+  // ===== LEARNING CARD =====
+  function updateLearningCard(monitorRows) {
+    const list = document.getElementById('learning-list');
+    if (!list) return;
+
+    list.innerHTML = "";
+    if (!monitorRows || !monitorRows.length) return;
+
+    const headerRow = monitorRows[0];
+    const headersLower = headerRow.map(h => h.trim().toLowerCase());
+
+    const idxProject    = headersLower.indexOf('project name');
+    const idxPeriod     = headersLower.indexOf('reporting period');
+    const idxAchieve    = headersLower.indexOf('main achievements this period.');
+    const idxChallenges = headersLower.indexOf('key challenges / risks');
+    const idxActions    = headersLower.indexOf('immediate actions required / recommendations');
+
+    const dataRows = monitorRows.slice(1).filter(r => !r.every(c => c.trim() === ""));
+    const recent = dataRows.slice(-6).reverse();
+
+    recent.forEach(row => {
+      const li = document.createElement('li');
+
+      const project = idxProject !== -1 ? (row[idxProject] || '') : '';
+      const period  = idxPeriod  !== -1 ? (row[idxPeriod]  || '') : '';
+
+      const ach  = idxAchieve    !== -1 ? (row[idxAchieve]    || '') : '';
+      const chal = idxChallenges !== -1 ? (row[idxChallenges] || '') : '';
+      const act  = idxActions    !== -1 ? (row[idxActions]    || '') : '';
+
+      li.innerHTML = `
+        <strong>${project}</strong> – ${period}<br>
+        ✅ ${ach}<br>
+        ⚠️ ${chal}<br>
+        📌 ${act}
+      `;
+      list.appendChild(li);
+    });
+  }
+
+  // ===== REPORTS CARD =====
+  function updateReportsCard(monitorRows) {
+    if (!monitorRows || !monitorRows.length) return;
+
+    const headerRow = monitorRows[0];
+    const headersLower = headerRow.map(h => h.trim().toLowerCase());
+
+    const idxPeriod = headersLower.indexOf('reporting period');
+    const idxDate   = headersLower.indexOf('reporting date');
+
+    const dataRows = monitorRows.slice(1).filter(r => !r.every(c => c.trim() === ""));
+    const totalReports = dataRows.length;
+
+    let latestPeriod = 'N/A';
+    let latestDate   = 'N/A';
+
+    if (dataRows.length > 0) {
+      const lastRow = dataRows[dataRows.length - 1];
+      if (idxPeriod !== -1) latestPeriod = lastRow[idxPeriod] || 'N/A';
+      if (idxDate   !== -1) latestDate   = lastRow[idxDate]   || 'N/A';
+    }
+
+    setText('rep-total', totalReports);
+    setText('rep-period', latestPeriod);
+    setText('rep-date', latestDate);
+  }
+
+  // ===== CHARTS (Overview charts) =====
+  function updateCharts(monitorRows) {
+    const ctx1 = document.getElementById('chart-avg-ratings');
+    const ctx2 = document.getElementById('chart-beneficiaries');
+
+    if (!monitorRows || !monitorRows.length || !ctx1 || !ctx2) return;
+
+    const headerRow = monitorRows[0];
+    const headersLower = headerRow.map(h => h.trim().toLowerCase());
+
+    const idxAct    = headersLower.indexOf('activity implementation on schedule');
+    const idxBud    = headersLower.indexOf('budget utilization as planned');
+    const idxStaff  = headersLower.indexOf('staff availability');
+    const idxComm   = headersLower.indexOf('community participation');
+    const idxCoord  = headersLower.indexOf('coordination with partners');
+    const idxPeriod = headersLower.indexOf('reporting period');
+    const idxBenef  = headersLower.indexOf('number of beneficiaries reached this period.');
+
+    const avgActivity = idxAct   !== -1 ? averageFieldFromRows(monitorRows, headerRow, 'activity implementation on schedule') : 0;
+    const avgBudget   = idxBud   !== -1 ? averageFieldFromRows(monitorRows, headerRow, 'budget utilization as planned') : 0;
+    const avgStaff    = idxStaff !== -1 ? averageFieldFromRows(monitorRows, headerRow, 'staff availability') : 0;
+    const avgComm     = idxComm  !== -1 ? averageFieldFromRows(monitorRows, headerRow, 'community participation') : 0;
+    const avgCoord    = idxCoord !== -1 ? averageFieldFromRows(monitorRows, headerRow, 'coordination with partners') : 0;
+
+    const ratingLabels = ['Activity', 'Budget', 'Staff', 'Community', 'Coordination'];
+    const theRatingData = [avgActivity, avgBudget, avgStaff, avgComm, avgCoord];
+
+    if (avgRatingsChart) avgRatingsChart.destroy();
+    avgRatingsChart = new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: ratingLabels,
+        datasets: [{
+          label: 'Average Rating (1–5)',
+          data: theRatingData
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true, suggestedMax: 5 } }
+      }
+    });
+
+    const periodMap = new Map();
+    const dataRows = monitorRows.slice(1).filter(r => !r.every(c => c.trim() === ""));
+
+    dataRows.forEach(row => {
+      if (idxPeriod === -1 || idxBenef === -1) return;
+      const per = (row[idxPeriod] || '').trim();
+      const b = parseFloat(row[idxBenef] || '0');
+      if (!per || isNaN(b)) return;
+      const current = periodMap.get(per) || 0;
+      periodMap.set(per, current + b);
+    });
+
+    const periodLabels = Array.from(periodMap.keys());
+    const benefData = Array.from(periodMap.values());
+
+    if (beneficiariesChart) beneficiariesChart.destroy();
+    beneficiariesChart = new Chart(ctx2, {
+      type: 'line',
+      data: {
+        labels: periodLabels,
+        datasets: [{
+          label: 'Total Beneficiaries',
+          data: benefData,
+          fill: false
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  }
+
+  // ===========================
+  // Monitoring Summary Charts
+  // ===========================
+  function safeLower(s) {
+    return (s || "").trim().toLowerCase();
+  }
+
+  function parseMonthKey(dateStr) {
+    if (!dateStr) return "";
+    const s = String(dateStr).trim();
+    if (!s) return "";
+
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      return `${y}-${m}`;
+    }
+
+    const mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (mdy) {
+      const mm = String(mdy[1]).padStart(2, "0");
+      const yy = mdy[3];
+      return `${yy}-${mm}`;
+    }
+
+    return "";
+  }
+
+  function sortLabels(labels) {
+    return labels.slice().sort((a, b) => a.localeCompare(b));
+  }
+
+  function setupMonGroupByListener() {
+    const sel = document.getElementById("mon-groupby");
+    if (!sel) return;
+
+    if (sel.dataset.bound === "true") return;
+    sel.dataset.bound = "true";
+
+    sel.addEventListener("change", () => {
+      const monitorForView = monitoringFilteredRows.length ? monitoringFilteredRows : monitoringRows;
+      updateMonitoringSummaryCharts(monitorForView);
+    });
+  }
+
+  function updateMonitoringSummaryCharts(monitorRows) {
+    setupMonGroupByListener();
+
+    const c1 = document.getElementById("mon-chart-overall-by-group");
+    const c2 = document.getElementById("mon-chart-beneficiaries-by-group");
+    if (!c1 || !c2) return;
+
+    if (!monitorRows || monitorRows.length <= 1) {
+      if (monOverallByGroupChart) { monOverallByGroupChart.destroy(); monOverallByGroupChart = null; }
+      if (monBenefByGroupChart) { monBenefByGroupChart.destroy(); monBenefByGroupChart = null; }
+      return;
+    }
+
+    const headerRow = monitorRows[0];
+    const headersLower = headerRow.map(h => safeLower(h));
+
+    const idxPeriod = headersLower.indexOf("reporting period");
+    const idxDate   = headersLower.indexOf("reporting date");
+    const idxBenef  = headersLower.indexOf("number of beneficiaries reached this period.");
+
+    const idxAct    = headersLower.indexOf("activity implementation on schedule");
+    const idxBud    = headersLower.indexOf("budget utilization as planned");
+    const idxStaff  = headersLower.indexOf("staff availability");
+    const idxComm   = headersLower.indexOf("community participation");
+    const idxCoord  = headersLower.indexOf("coordination with partners");
+
+    const groupMode = document.getElementById("mon-groupby")?.value || "period";
+
+    const groups = new Map();
+
+    const dataRows = monitorRows.slice(1).filter(r => !r.every(c => String(c || "").trim() === ""));
+    dataRows.forEach(row => {
+      const per = idxPeriod !== -1 ? String(row[idxPeriod] || "").trim() : "";
+      const dt  = idxDate   !== -1 ? String(row[idxDate] || "").trim()   : "";
+      const monthKey = parseMonthKey(dt);
+
+      const key = (groupMode === "month")
+        ? (monthKey || "Unknown Month")
+        : (per || "Unknown Period");
+
+      if (!groups.has(key)) groups.set(key, { ratingSum: 0, ratingCount: 0, benefTotal: 0 });
+
+      const g = groups.get(key);
+
+      if (idxBenef !== -1) {
+        const b = parseFloat(row[idxBenef] || "0");
+        if (!isNaN(b)) g.benefTotal += b;
+      }
+
+      const vals = [];
+      [idxAct, idxBud, idxStaff, idxComm, idxCoord].forEach(idx => {
+        if (idx !== -1) {
+          const v = parseFloat(row[idx] || "");
+          if (!isNaN(v)) vals.push(v);
+        }
+      });
+
+      if (vals.length) {
+        const rowAvg = vals.reduce((a, x) => a + x, 0) / vals.length;
+        g.ratingSum += rowAvg;
+        g.ratingCount += 1;
+      }
+    });
+
+    const labels = sortLabels(Array.from(groups.keys()));
+    const overallAvg = labels.map(k => {
+      const g = groups.get(k);
+      return g.ratingCount ? +(g.ratingSum / g.ratingCount).toFixed(2) : 0;
+    });
+    const benefTotals = labels.map(k => +(groups.get(k).benefTotal || 0).toFixed(0));
+
+    if (monOverallByGroupChart) monOverallByGroupChart.destroy();
+    monOverallByGroupChart = new Chart(c1, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: groupMode === "month"
+            ? "Avg Overall Rating by Month (1–5)"
+            : "Avg Overall Rating by Period (1–5)",
+          data: overallAvg
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true, suggestedMax: 5 } }
+      }
+    });
+
+    if (monBenefByGroupChart) monBenefByGroupChart.destroy();
+    monBenefByGroupChart = new Chart(c2, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          label: groupMode === "month"
+            ? "Total Beneficiaries by Month"
+            : "Total Beneficiaries by Period",
+          data: benefTotals,
+          fill: false
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  }
+
+  // ===========================
+  // Evaluation Charts
+  // ===========================
+  function updateEvaluationCharts(evalRows) {
+    const canvas = document.getElementById("eval-chart-ratings");
+    if (!canvas) return;
+
+    if (!evalRows || evalRows.length <= 1) {
+      if (evalRatingsChart) { evalRatingsChart.destroy(); evalRatingsChart = null; }
+      return;
+    }
+
+    const headerRow = evalRows[0];
+    const headersLower = headerRow.map(h => (h || "").trim().toLowerCase());
+
+    const ratingCols = [];
+    headersLower.forEach((h, idx) => {
+      if (h.includes("rating")) ratingCols.push(idx);
+    });
+
+    if (!ratingCols.length) return;
+
+    const labels = ratingCols.map(i => headerRow[i]);
+    const sums = new Array(ratingCols.length).fill(0);
+    const counts = new Array(ratingCols.length).fill(0);
+
+    for (let i = 1; i < evalRows.length; i++) {
+      const row = evalRows[i];
+      ratingCols.forEach((colIdx, j) => {
+        const v = parseFloat(row[colIdx]);
+        if (!isNaN(v)) { sums[j] += v; counts[j]++; }
+      });
+    }
+
+    const avgs = sums.map((s, i) => (counts[i] ? +(s / counts[i]).toFixed(2) : 0));
+
+    if (evalRatingsChart) evalRatingsChart.destroy();
+    evalRatingsChart = new Chart(canvas, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Average Evaluation Rating (1–5)",
+          data: avgs
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true, suggestedMax: 5 } }
+      }
+    });
+  }
+
+  // ===========================
+  // Traffic-light KPI Engine
+  // ===========================
+  function getCssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function percentFromRating(avgRating, max = 5) {
+    if (!avgRating || isNaN(avgRating)) return 0;
+    const pct = (avgRating / max) * 100;
+    return Math.max(0, Math.min(100, pct));
+  }
+
+  function statusFromPercent(p) {
+    if (p <= 40) return "bad";
+    if (p <= 60) return "warn";
+    return "good";
+  }
+
+  function applyKpiStatus(boxId, valueId, percent) {
+    const box = document.getElementById(boxId);
+    const val = document.getElementById(valueId);
+    if (!box || !val) return;
+
+    box.classList.remove("kpi-good", "kpi-warn", "kpi-bad");
+    val.classList.remove("kpi-good", "kpi-warn", "kpi-bad");
+
+    const s = statusFromPercent(percent);
+    if (s === "good") { box.classList.add("kpi-good"); val.classList.add("kpi-good"); }
+    else if (s === "warn") { box.classList.add("kpi-warn"); val.classList.add("kpi-warn"); }
+    else { box.classList.add("kpi-bad"); val.classList.add("kpi-bad"); }
+  }
+
+  function chartColorForPercent(percent) {
+    const s = statusFromPercent(percent);
+    if (s === "good") return getCssVar("--status-good");
+    if (s === "warn") return getCssVar("--status-warn");
+    return getCssVar("--status-bad");
+  }
+
+  // ----- Monitoring KPIs -----
+  function updateMonitoringKPIs(monitorRows) {
+    const barCanvas = document.getElementById("mon-kpi-bar");
+    const donutCanvas = document.getElementById("mon-kpi-donut");
+    if (!barCanvas || !donutCanvas) return;
+
+    if (!monitorRows || monitorRows.length <= 1) {
+      setText("mon-kpi-activity", "0%");
+      setText("mon-kpi-budget", "0%");
+      setText("mon-kpi-staff", "0%");
+      setText("mon-kpi-community", "0%");
+      setText("mon-kpi-coordination", "0%");
+      setText("mon-kpi-overall", "0%");
+
+      if (monKpiBarChart) { monKpiBarChart.destroy(); monKpiBarChart = null; }
+      if (monKpiDonutChart) { monKpiDonutChart.destroy(); monKpiDonutChart = null; }
+      return;
+    }
+
+    const headerRow = monitorRows[0];
+    const headersLower = headerRow.map(h => safeLower(h));
+
+    const idxAct   = headersLower.indexOf("activity implementation on schedule");
+    const idxBud   = headersLower.indexOf("budget utilization as planned");
+    const idxStaff = headersLower.indexOf("staff availability");
+    const idxComm  = headersLower.indexOf("community participation");
+    const idxCoord = headersLower.indexOf("coordination with partners");
+
+    const dataRows = monitorRows.slice(1).filter(r => !r.every(c => String(c || "").trim() === ""));
+
+    const avgs = {
+      activity: idxAct !== -1 ? averageFieldFromRows(monitorRows, headerRow, "activity implementation on schedule") : 0,
+      budget:   idxBud !== -1 ? averageFieldFromRows(monitorRows, headerRow, "budget utilization as planned") : 0,
+      staff:    idxStaff !== -1 ? averageFieldFromRows(monitorRows, headerRow, "staff availability") : 0,
+      community:idxComm !== -1 ? averageFieldFromRows(monitorRows, headerRow, "community participation") : 0,
+      coord:    idxCoord !== -1 ? averageFieldFromRows(monitorRows, headerRow, "coordination with partners") : 0
+    };
+
+    const pctActivity = Math.round(percentFromRating(avgs.activity));
+    const pctBudget   = Math.round(percentFromRating(avgs.budget));
+    const pctStaff    = Math.round(percentFromRating(avgs.staff));
+    const pctComm     = Math.round(percentFromRating(avgs.community));
+    const pctCoord    = Math.round(percentFromRating(avgs.coord));
+
+    const availablePcts = [pctActivity, pctBudget, pctStaff, pctComm, pctCoord].filter(p => p > 0);
+    const pctOverall = availablePcts.length
+      ? Math.round(availablePcts.reduce((a, x) => a + x, 0) / availablePcts.length)
+      : 0;
+
+    setText("mon-kpi-activity", pctActivity + "%");
+    setText("mon-kpi-budget", pctBudget + "%");
+    setText("mon-kpi-staff", pctStaff + "%");
+    setText("mon-kpi-community", pctComm + "%");
+    setText("mon-kpi-coordination", pctCoord + "%");
+    setText("mon-kpi-overall", pctOverall + "%");
+
+    applyKpiStatus("mon-kpi-activity-box", "mon-kpi-activity", pctActivity);
+    applyKpiStatus("mon-kpi-budget-box", "mon-kpi-budget", pctBudget);
+    applyKpiStatus("mon-kpi-staff-box", "mon-kpi-staff", pctStaff);
+    applyKpiStatus("mon-kpi-community-box", "mon-kpi-community", pctComm);
+    applyKpiStatus("mon-kpi-coordination-box", "mon-kpi-coordination", pctCoord);
+    applyKpiStatus("mon-kpi-overall-box", "mon-kpi-overall", pctOverall);
+
+    let cntBad = 0, cntWarn = 0, cntGood = 0;
+    dataRows.forEach(row => {
+      const vals = [];
+      [idxAct, idxBud, idxStaff, idxComm, idxCoord].forEach(idx => {
+        if (idx !== -1) {
+          const v = parseFloat(row[idx] || "");
+          if (!isNaN(v)) vals.push(v);
+        }
+      });
+      if (!vals.length) return;
+      const rowAvg = vals.reduce((a, x) => a + x, 0) / vals.length;
+
+      if (rowAvg >= 4) cntGood++;
+      else if (rowAvg <= 2) cntBad++;
+      else cntWarn++;
+    });
+
+    const barLabels = ["Activity", "Budget", "Staff", "Community", "Coordination", "Overall"];
+    const barData = [pctActivity, pctBudget, pctStaff, pctComm, pctCoord, pctOverall];
+    const barColors = barData.map(p => chartColorForPercent(p));
+
+    if (monKpiBarChart) monKpiBarChart.destroy();
+    monKpiBarChart = new Chart(barCanvas, {
+      type: "bar",
+      data: {
+        labels: barLabels,
+        datasets: [{
+          label: "KPI Score (%)",
+          data: barData,
+          backgroundColor: barColors
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true, max: 100 } }
+      }
+    });
+
+    if (monKpiDonutChart) monKpiDonutChart.destroy();
+    monKpiDonutChart = new Chart(donutCanvas, {
+      type: "doughnut",
+      data: {
+        labels: ["Off-track / Poor", "Moderate / Watch", "On-track / Good"],
+        datasets: [{
+          data: [cntBad, cntWarn, cntGood],
+          backgroundColor: [
+            getCssVar("--status-bad"),
+            getCssVar("--status-warn"),
+            getCssVar("--status-good")
+          ]
+        }]
+      },
+      options: { responsive: true }
+    });
+  }
+
+  // ----- Evaluation KPIs -----
+  function updateEvaluationKPIs(evalRows) {
+    const barCanvas = document.getElementById("eval-kpi-bar");
+    const donutCanvas = document.getElementById("eval-kpi-donut");
+    if (!barCanvas || !donutCanvas) return;
+
+    if (!evalRows || evalRows.length <= 1) {
+      setText("ev-kpi-outcome", "0%");
+      setText("ev-kpi-impact", "0%");
+      setText("ev-kpi-performance", "0%");
+      setText("ev-kpi-records", "0");
+
+      if (evalKpiBarChart) { evalKpiBarChart.destroy(); evalKpiBarChart = null; }
+      if (evalKpiDonutChart) { evalKpiDonutChart.destroy(); evalKpiDonutChart = null; }
+      return;
+    }
+
+    const headerRow = evalRows[0];
+    const headersLower = headerRow.map(h => safeLower(h));
+
+    const idxOutcome = headersLower.findIndex(h => h.includes("outcome") && h.includes("rating"));
+    const idxImpact  = headersLower.findIndex(h => h.includes("impact") && h.includes("rating"));
+
+    let idxPerf = headersLower.findIndex(h => (h.includes("overall") || h.includes("performance")) && h.includes("rating"));
+    if (idxPerf === -1) idxPerf = headersLower.findIndex(h => h.includes("rating"));
+
+    const dataRows = evalRows.slice(1).filter(r => !r.every(c => String(c || "").trim() === ""));
+    setText("ev-kpi-records", String(dataRows.length));
+
+    const avgOutcome = idxOutcome !== -1 ? averageFieldFromRows(evalRows, headerRow, headersLower[idxOutcome]) : 0;
+    const avgImpact  = idxImpact  !== -1 ? averageFieldFromRows(evalRows, headerRow, headersLower[idxImpact])  : 0;
+
+    let avgPerf = 0;
+    if (idxPerf !== -1) {
+      avgPerf = averageFieldFromRows(evalRows, headerRow, headersLower[idxPerf]);
+    } else {
+      const tmp = [avgOutcome, avgImpact].filter(x => x > 0);
+      avgPerf = tmp.length ? (tmp.reduce((a, x) => a + x, 0) / tmp.length) : 0;
+    }
+
+    const pctOutcome = Math.round(percentFromRating(avgOutcome));
+    const pctImpact  = Math.round(percentFromRating(avgImpact));
+    const pctPerf    = Math.round(percentFromRating(avgPerf));
+
+    setText("ev-kpi-outcome", pctOutcome + "%");
+    setText("ev-kpi-impact", pctImpact + "%");
+    setText("ev-kpi-performance", pctPerf + "%");
+
+    applyKpiStatus("ev-kpi-outcome-box", "ev-kpi-outcome", pctOutcome);
+    applyKpiStatus("ev-kpi-impact-box", "ev-kpi-impact", pctImpact);
+    applyKpiStatus("ev-kpi-performance-box", "ev-kpi-performance", pctPerf);
+
+    let cntBad = 0, cntWarn = 0, cntGood = 0;
+
+    dataRows.forEach(row => {
+      let perfVal = NaN;
+      if (idxPerf !== -1) perfVal = parseFloat(row[idxPerf] || "");
+
+      if (isNaN(perfVal)) {
+        const vals = [];
+        if (idxOutcome !== -1) {
+          const v = parseFloat(row[idxOutcome] || "");
+          if (!isNaN(v)) vals.push(v);
+        }
+        if (idxImpact !== -1) {
+          const v = parseFloat(row[idxImpact] || "");
+          if (!isNaN(v)) vals.push(v);
+        }
+        if (vals.length) perfVal = vals.reduce((a, x) => a + x, 0) / vals.length;
+      }
+
+      if (isNaN(perfVal)) return;
+
+      if (perfVal >= 4) cntGood++;
+      else if (perfVal <= 2) cntBad++;
+      else cntWarn++;
+    });
+
+    const barLabels = ["Outcome", "Impact", "Performance"];
+    const barData = [pctOutcome, pctImpact, pctPerf];
+    const barColors = barData.map(p => chartColorForPercent(p));
+
+    if (evalKpiBarChart) evalKpiBarChart.destroy();
+    evalKpiBarChart = new Chart(barCanvas, {
+      type: "bar",
+      data: {
+        labels: barLabels,
+        datasets: [{
+          label: "KPI Score (%)",
+          data: barData,
+          backgroundColor: barColors
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true, max: 100 } }
+      }
+    });
+
+    if (evalKpiDonutChart) evalKpiDonutChart.destroy();
+    evalKpiDonutChart = new Chart(donutCanvas, {
+      type: "doughnut",
+      data: {
+        labels: ["Off-track / Poor", "Moderate / Watch", "On-track / Good"],
+        datasets: [{
+          data: [cntBad, cntWarn, cntGood],
+          backgroundColor: [
+            getCssVar("--status-bad"),
+            getCssVar("--status-warn"),
+            getCssVar("--status-good")
+          ]
+        }]
+      },
+      options: { responsive: true }
+    });
+  }
+
+  // ✅ NEW: Overview KPIs (Monitoring + Evaluation + Combined)
+  function updateOverviewKPIs(monitorRows, evalRows) {
+    const barCanvas = document.getElementById("ov-kpi-bar");
+    const donutCanvas = document.getElementById("ov-kpi-donut");
+    if (!barCanvas || !donutCanvas) return;
+
+    // --- Monitoring overall % (from monitoring rows)
+    let monOverallPct = 0;
+    let monBad = 0, monWarn = 0, monGood = 0;
+
+    if (monitorRows && monitorRows.length > 1) {
+      const headerRow = monitorRows[0];
+      const headersLower = headerRow.map(h => safeLower(h));
+
+      const idxAct   = headersLower.indexOf("activity implementation on schedule");
+      const idxBud   = headersLower.indexOf("budget utilization as planned");
+      const idxStaff = headersLower.indexOf("staff availability");
+      const idxComm  = headersLower.indexOf("community participation");
+      const idxCoord = headersLower.indexOf("coordination with partners");
+
+      const avgAct   = idxAct   !== -1 ? averageFieldFromRows(monitorRows, headerRow, "activity implementation on schedule") : 0;
+      const avgBud   = idxBud   !== -1 ? averageFieldFromRows(monitorRows, headerRow, "budget utilization as planned") : 0;
+      const avgStaff = idxStaff !== -1 ? averageFieldFromRows(monitorRows, headerRow, "staff availability") : 0;
+      const avgComm  = idxComm  !== -1 ? averageFieldFromRows(monitorRows, headerRow, "community participation") : 0;
+      const avgCoord = idxCoord !== -1 ? averageFieldFromRows(monitorRows, headerRow, "coordination with partners") : 0;
+
+      const pcts = [
+        Math.round(percentFromRating(avgAct)),
+        Math.round(percentFromRating(avgBud)),
+        Math.round(percentFromRating(avgStaff)),
+        Math.round(percentFromRating(avgComm)),
+        Math.round(percentFromRating(avgCoord))
+      ].filter(p => p > 0);
+
+      monOverallPct = pcts.length ? Math.round(pcts.reduce((a, x) => a + x, 0) / pcts.length) : 0;
+
+      // Distribution counts (row-level)
+      const dataRows = monitorRows.slice(1).filter(r => !r.every(c => String(c || "").trim() === ""));
+      dataRows.forEach(row => {
+        const vals = [];
+        [idxAct, idxBud, idxStaff, idxComm, idxCoord].forEach(idx => {
+          if (idx !== -1) {
+            const v = parseFloat(row[idx] || "");
+            if (!isNaN(v)) vals.push(v);
+          }
+        });
+        if (!vals.length) return;
+        const rowAvg = vals.reduce((a, x) => a + x, 0) / vals.length;
+        if (rowAvg >= 4) monGood++;
+        else if (rowAvg <= 2) monBad++;
+        else monWarn++;
+      });
+    }
+
+    // --- Evaluation outcome/impact/performance % and distribution counts
+    let evOutcomePct = 0, evImpactPct = 0, evPerfPct = 0;
+    let evBad = 0, evWarn = 0, evGood = 0;
+
+    if (evalRows && evalRows.length > 1) {
+      const headerRow = evalRows[0];
+      const headersLower = headerRow.map(h => safeLower(h));
+
+      const idxOutcome = headersLower.findIndex(h => h.includes("outcome") && h.includes("rating"));
+      const idxImpact  = headersLower.findIndex(h => h.includes("impact") && h.includes("rating"));
+      let idxPerf = headersLower.findIndex(h => (h.includes("overall") || h.includes("performance")) && h.includes("rating"));
+      if (idxPerf === -1) idxPerf = headersLower.findIndex(h => h.includes("rating"));
+
+      const avgOutcome = idxOutcome !== -1 ? averageFieldFromRows(evalRows, headerRow, headersLower[idxOutcome]) : 0;
+      const avgImpact  = idxImpact  !== -1 ? averageFieldFromRows(evalRows, headerRow, headersLower[idxImpact])  : 0;
+
+      let avgPerf = 0;
+      if (idxPerf !== -1) {
+        avgPerf = averageFieldFromRows(evalRows, headerRow, headersLower[idxPerf]);
+      } else {
+        const tmp = [avgOutcome, avgImpact].filter(x => x > 0);
+        avgPerf = tmp.length ? (tmp.reduce((a, x) => a + x, 0) / tmp.length) : 0;
+      }
+
+      evOutcomePct = Math.round(percentFromRating(avgOutcome));
+      evImpactPct  = Math.round(percentFromRating(avgImpact));
+      evPerfPct    = Math.round(percentFromRating(avgPerf));
+
+      const dataRows = evalRows.slice(1).filter(r => !r.every(c => String(c || "").trim() === ""));
+      dataRows.forEach(row => {
+        let perfVal = NaN;
+        if (idxPerf !== -1) perfVal = parseFloat(row[idxPerf] || "");
+
+        if (isNaN(perfVal)) {
+          const vals = [];
+          if (idxOutcome !== -1) {
+            const v = parseFloat(row[idxOutcome] || "");
+            if (!isNaN(v)) vals.push(v);
+          }
+          if (idxImpact !== -1) {
+            const v = parseFloat(row[idxImpact] || "");
+            if (!isNaN(v)) vals.push(v);
+          }
+          if (vals.length) perfVal = vals.reduce((a, x) => a + x, 0) / vals.length;
+        }
+
+        if (isNaN(perfVal)) return;
+
+        if (perfVal >= 4) evGood++;
+        else if (perfVal <= 2) evBad++;
+        else evWarn++;
+      });
+    }
+
+    // --- Combined Project Performance %
+    const comboParts = [];
+    if (monOverallPct > 0) comboParts.push(monOverallPct);
+    if (evPerfPct > 0) comboParts.push(evPerfPct);
+    const combinedPct = comboParts.length ? Math.round(comboParts.reduce((a, x) => a + x, 0) / comboParts.length) : 0;
+
+    // Update KPI texts
+    setText("ov-kpi-monitoring", monOverallPct + "%");
+    setText("ov-kpi-evalperf", evPerfPct + "%");
+    setText("ov-kpi-outcome", evOutcomePct + "%");
+    setText("ov-kpi-impact", evImpactPct + "%");
+    setText("ov-kpi-combined", combinedPct + "%");
+
+    // Apply status styling
+    applyKpiStatus("ov-kpi-monitoring-box", "ov-kpi-monitoring", monOverallPct);
+    applyKpiStatus("ov-kpi-evalperf-box", "ov-kpi-evalperf", evPerfPct);
+    applyKpiStatus("ov-kpi-outcome-box", "ov-kpi-outcome", evOutcomePct);
+    applyKpiStatus("ov-kpi-impact-box", "ov-kpi-impact", evImpactPct);
+    applyKpiStatus("ov-kpi-combined-box", "ov-kpi-combined", combinedPct);
+
+    // Bar chart
+    const barLabels = ["Monitoring", "Evaluation", "Outcome", "Impact", "Combined"];
+    const barData = [monOverallPct, evPerfPct, evOutcomePct, evImpactPct, combinedPct];
+    const barColors = barData.map(p => chartColorForPercent(p));
+
+    if (ovKpiBarChart) ovKpiBarChart.destroy();
+    ovKpiBarChart = new Chart(barCanvas, {
+      type: "bar",
+      data: {
+        labels: barLabels,
+        datasets: [{
+          label: "High Level KPI Score (%)",
+          data: barData,
+          backgroundColor: barColors
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true, max: 100 } }
+      }
+    });
+
+    // Doughnut chart (combined distribution counts)
+    const totalBad = monBad + evBad;
+    const totalWarn = monWarn + evWarn;
+    const totalGood = monGood + evGood;
+
+    if (ovKpiDonutChart) ovKpiDonutChart.destroy();
+    ovKpiDonutChart = new Chart(donutCanvas, {
+      type: "doughnut",
+      data: {
+        labels: ["Off-track / Poor", "Moderate / Watch", "On-track / Good"],
+        datasets: [{
+          data: [totalBad, totalWarn, totalGood],
+          backgroundColor: [
+            getCssVar("--status-bad"),
+            getCssVar("--status-warn"),
+            getCssVar("--status-good")
+          ]
+        }]
+      },
+      options: { responsive: true }
+    });
+  }
+
+  // ===== PDF REPORT =====
+  function generatePDFReport() {
+    try {
+      const jsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+      if (!jsPDF) { alert("PDF library not loaded."); return; }
+
+      const proj = document.getElementById('ov-total-projects')?.textContent || '0';
+      const mon = document.getElementById('ov-total-monitoring')?.textContent || '0';
+      const evl = document.getElementById('ov-total-evaluation')?.textContent || '0';
+      const ben = document.getElementById('ov-total-beneficiaries')?.textContent || '0';
+      const score = document.getElementById('ov-overall-score')?.textContent || '0';
+
+      const doc = new jsPDF();
+
+      doc.setFontSize(14);
+      doc.text('ProMEL PMCEL Summary Report', 10, 12);
+
+      doc.setFontSize(10);
+      doc.text('Overview (based on current filters):', 10, 22);
+      doc.text('Total Projects: ' + proj, 10, 30);
+      doc.text('Total Monitoring Records: ' + mon, 10, 36);
+      doc.text('Total Evaluation Records: ' + evl, 10, 42);
+      doc.text('Total Beneficiaries Reached: ' + ben, 10, 48);
+      doc.text('Overall Performance Score (Activity & Budget): ' + score, 10, 54);
+
+      doc.text('Generated by ProMEL Analytics Solutions', 10, 70);
+
+      doc.save('ProMEL_PMEL_Report.pdf');
+    } catch (e) {
+      console.error(e);
+      alert('Unable to generate PDF report. See console for details.');
+    }
+  }
+
+  // ===== DATA ENTRY FORMS (DEMO HOOKS) =====
+  function setupDataEntryForms() {
+    const monForm = document.getElementById('monitoring-entry-form');
+    const evalForm = document.getElementById('evaluation-entry-form');
+
+    if (monForm) {
+      monForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        alert('Monitoring entry captured in the browser.\n\nTo send this to Google Sheets, connect this form to a Google Apps Script Web App endpoint.');
+      });
+    }
+
+    if (evalForm) {
+      evalForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        alert('Evaluation entry captured in the browser.\n\nTo send this to Google Sheets, connect this form to a Google Apps Script Web App endpoint.');
+      });
+    }
+  }
+
+  // ===========================
+  // ✅ NEW (B): AI Snapshot + Row Sampling + Visual Renderer
+  // ===========================
+  let aiKpiBarChart = null;
+  let aiDistDonutChart = null;
+
+  function safeNum(v) {
+    const n = parseFloat(v);
+    return isNaN(n) ? null : n;
+  }
+
+  function rowsToObjects(rows) {
+    if (!rows || rows.length <= 1) return [];
+    const headers = rows[0].map(h => String(h || '').trim());
+    const objs = [];
+    for (let i = 1; i < rows.length; i++) {
+      const r = rows[i];
+      if (!r || r.every(c => String(c || '').trim() === '')) continue;
+      const obj = {};
+      headers.forEach((h, idx) => obj[h] = (r[idx] ?? '').toString().trim());
+      objs.push(obj);
+    }
+    return objs;
+  }
+
+  function takeLastN(objs, n) {
+    if (!Array.isArray(objs)) return [];
+    if (objs.length <= n) return objs;
+    return objs.slice(objs.length - n);
+  }
+
+  function buildKpiSnapshot() {
+    return {
+      totalProjects: document.getElementById('ov-total-projects')?.textContent || '0',
+      totalMonitoring: document.getElementById('ov-total-monitoring')?.textContent || '0',
+      totalEvaluation: document.getElementById('ov-total-evaluation')?.textContent || '0',
+      totalBeneficiaries: document.getElementById('ov-total-beneficiaries')?.textContent || '0',
+      overallScore: document.getElementById('ov-overall-score')?.textContent || '0',
+
+      monitoringOverallPct: document.getElementById('ov-kpi-monitoring')?.textContent || '0%',
+      evaluationPerfPct: document.getElementById('ov-kpi-evalperf')?.textContent || '0%',
+      outcomePct: document.getElementById('ov-kpi-outcome')?.textContent || '0%',
+      impactPct: document.getElementById('ov-kpi-impact')?.textContent || '0%',
+      combinedPct: document.getElementById('ov-kpi-combined')?.textContent || '0%'
+    };
+  }
+
+  function tryParseJson(text) {
+    if (!text) return null;
+    const t = String(text).trim();
+    const unfenced = t
+      .replace(/^```json/i, '')
+      .replace(/^```/i, '')
+      .replace(/```$/i, '')
+      .trim();
+    try { return JSON.parse(unfenced); } catch { return null; }
+  }
+
+  function renderAiVisuals(visuals) {
+    const barCanvas = document.getElementById('ai-vis-kpi-bar');
+    const donutCanvas = document.getElementById('ai-vis-distribution-donut');
+    if (!barCanvas || !donutCanvas) return;
+
+    const kpiScores = visuals?.kpi_scores || [];
+    const dist = visuals?.distribution || { good: 0, watch: 0, poor: 0 };
+
+    const labels = kpiScores.map(x => x.label || 'KPI');
+    const data = kpiScores.map(x => Math.max(0, Math.min(100, safeNum(x.percent) ?? 0)));
+    const colors = data.map(p => chartColorForPercent(p));
+
+    if (aiKpiBarChart) aiKpiBarChart.destroy();
+    aiKpiBarChart = new Chart(barCanvas, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'KPI Score (%)',
+          data,
+          backgroundColor: colors
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true, max: 100 } }
+      }
+    });
+
+    if (aiDistDonutChart) aiDistDonutChart.destroy();
+    aiDistDonutChart = new Chart(donutCanvas, {
+      type: 'doughnut',
+      data: {
+        labels: ['On-track / Good', 'Moderate / Watch', 'Off-track / Poor'],
+        datasets: [{
+          data: [dist.good || 0, dist.watch || 0, dist.poor || 0],
+          backgroundColor: [
+            getCssVar('--status-good'),
+            getCssVar('--status-warn'),
+            getCssVar('--status-bad')
+          ]
+        }]
+      },
+      options: { responsive: true }
+    });
+  }
+
+  // ===== AI ASSISTANT (FRONTEND HOOK, WIRED TO RAILWAY BACKEND) =====
+  async function sendToAIAssistant() {
+    const modeEl = document.getElementById('ai-mode');
+    const promptEl = document.getElementById('ai-prompt');
+    const includeFiltersEl = document.getElementById('ai-include-filters');
+    const statusEl = document.getElementById('ai-status');
+    const responseBox = document.getElementById('ai-response-box');
+
+    // The button inside the AI input panel (the one that calls this function)
+    const buttonEl = document.querySelector('#openai .ai-input-panel button');
+
+    const mode = modeEl ? modeEl.value : 'custom';
+    const prompt = (promptEl ? promptEl.value : '').trim();
+    const includeFilters = includeFiltersEl ? includeFiltersEl.checked : true;
+
+    if (!prompt) {
+      alert('Please enter a prompt or question for the AI assistant.');
+      return;
+    }
+
+    // Current filter context
+    const project = document.getElementById('filter-project')?.value || '';
+    const period = document.getElementById('filter-period')?.value || '';
+    const location = document.getElementById('filter-location')?.value || '';
+
+    // Build record samples so AI can read narrative fields
+    const monitorForView = monitoringFilteredRows.length ? monitoringFilteredRows : monitoringRows;
+    const evalForView = evaluationFilteredRows.length ? evaluationFilteredRows : evaluationRows;
+
+    const monitoringObjects = rowsToObjects(monitorForView);
+    const evaluationObjects = rowsToObjects(evalForView);
+
+    // Take last 8 records
+    const monitoring_sample = takeLastN(monitoringObjects, 8);
+    const evaluation_sample = takeLastN(evaluationObjects, 8);
+
+    // KPI snapshot
+    const kpi_snapshot = buildKpiSnapshot();
+
+    // Ask backend to return strict JSON (for visuals)
+    const aiInstruction = `
+Return your answer as STRICT JSON (no markdown) with this schema:
+
+{
+  "report_title": "string",
+  "report_markdown": "string (use headings, bullet points, short paragraphs)",
+  "key_findings": ["string", "..."],
+  "recommendations": ["string", "..."],
+  "visuals": {
+    "kpi_scores": [{"label":"string","percent":number}, ...],
+    "distribution": {"good":number,"watch":number,"poor":number}
+  }
+}
+
+Use monitoring_sample and evaluation_sample narrative fields:
+- Main achievements this period.
+- Key challenges / risks.
+- Immediate actions required / recommendations.
+- Reporting date and reporting period.
+
+Also compute the KPI scores (%):
+- Activity, Budget, Staff, Community, Coordination (from monitoring ratings 1–5 scaled to %)
+- Outcome, Impact, Performance (from evaluation ratings 1–5 scaled to %)
+And distribution counts:
+- good = avg rating >= 4
+- watch = avg rating == 3
+- poor = avg rating <= 2
+`.trim();
+
+    const payload = {
+      message: `[Mode: ${mode}] ${prompt}\n\n${aiInstruction}`,
+      filters: includeFilters ? { project, period, location } : {},
+      kpi_snapshot: includeFilters ? kpi_snapshot : {},
+      monitoring_sample: includeFilters ? monitoring_sample : [],
+      evaluation_sample: includeFilters ? evaluation_sample : []
+    };
+
+    // UI: show loading state
+    if (statusEl) statusEl.textContent = 'ProMEL AI is analysing your request…';
+    if (responseBox) responseBox.textContent = '';
+    if (buttonEl) {
+      buttonEl.disabled = true;
+      buttonEl.textContent = 'Thinking…';
+    }
+
+    try {
+      const res = await fetch(AI_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      let data;
+      try {
+        data = await res.json();
+      } catch (parseErr) {
+        throw new Error('Could not read AI response (invalid JSON).');
+      }
+
+      if (!res.ok) {
+        const apiError = data?.error || `HTTP ${res.status}`;
+        if (statusEl) statusEl.textContent = 'Error from ProMEL AI backend.';
+        if (responseBox) responseBox.textContent = apiError;
+        return;
+      }
+
+      // Parse JSON reply and render visuals; fallback to text mode
+      if (data.success) {
+        const rawReply = data.reply || '';
+        const parsed = tryParseJson(rawReply);
+
+        if (parsed) {
+          const title = parsed.report_title ? `# ${parsed.report_title}\n\n` : '';
+          const findings = Array.isArray(parsed.key_findings) && parsed.key_findings.length
+            ? `## Key Findings\n- ${parsed.key_findings.join('\n- ')}\n\n`
+            : '';
+          const recs = Array.isArray(parsed.recommendations) && parsed.recommendations.length
+            ? `## Recommendations\n- ${parsed.recommendations.join('\n- ')}\n\n`
+            : '';
+
+          const narrative = (title + (parsed.report_markdown || '') + '\n\n' + findings + recs).trim();
+
+          if (responseBox) responseBox.textContent = narrative || '(No narrative returned)';
+
+          // Render visuals
+          renderAiVisuals(parsed.visuals);
+
+          if (statusEl) statusEl.textContent = 'AI report + visuals generated.';
+        } else {
+          // Fallback: show raw text if backend didn't return JSON
+          if (responseBox) responseBox.textContent = rawReply || '(No reply text returned)';
+          if (statusEl) statusEl.textContent = 'AI response received (text mode).';
+        }
+      } else {
+        if (statusEl) statusEl.textContent = 'AI error: ' + (data.error || 'Unknown error from backend');
+        if (responseBox) responseBox.textContent = '';
+      }
+    } catch (err) {
+      console.error('Error calling ProMEL AI endpoint:', err);
+      if (statusEl) statusEl.textContent = 'Network or backend error. Please try again.';
+      if (responseBox) responseBox.textContent = err.message || String(err);
+    } finally {
+      // Reset button state
+      if (buttonEl) {
+        buttonEl.disabled = false;
+        buttonEl.textContent = 'Ask ProMEL AI';
+      }
+    }
+  }
+</script>
+
+</body>
+</html>
