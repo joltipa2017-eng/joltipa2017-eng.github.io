@@ -901,8 +901,13 @@
           </div>
 
           <button type="button" onclick="sendToAIAssistant()">Ask ProMEL AI</button>
-          <div id="ai-status" class="info-note"></div>
-        </div>
+
+<div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+  <button type="button" onclick="exportAIReportToPDF()">Download AI Report (PDF)</button>
+  <button type="button" onclick="exportAIReportToWord()">Download AI Report (Word)</button>
+</div>
+
+<div id="ai-status" class="info-note"></div>
 
         <!-- ✅ UPDATED (A): Output panel now includes AI visuals canvases -->
         <div class="ai-output-panel">
@@ -942,6 +947,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
+    /* =====================================================
+     FIX: Redirect wrong GitHub Pages URL (/index.html/)
+     ===================================================== */
+  (function fixBadIndexSlashUrl() {
+    const path = window.location.pathname || "";
+    if (path.endsWith("/index.html/")) {
+      window.location.replace("/");
+    }
+  })();
+
+  // (everything else stays exactly the same below)
+
   // ===========================
   // CONFIG: AI BACKEND ENDPOINT (ONLINE - RAILWAY)
   // ===========================
@@ -2338,6 +2355,111 @@
     }
   }
 
+/* ======================================================
+   FIX A: AI REPORT EXPORT (PDF + WORD)
+   ====================================================== */
+
+function exportAIReportToPDF() {
+  const jsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+  if (!jsPDF) {
+    alert("PDF library not loaded.");
+    return;
+  }
+
+  const content = document.getElementById("ai-response-box")?.innerText || "";
+  if (!content.trim()) {
+    alert("No AI report available to export.");
+    return;
+  }
+
+  const doc = new jsPDF();
+  const lines = doc.splitTextToSize(content, 180);
+
+  doc.setFontSize(12);
+  doc.text("ProMEL AI Generated Report", 10, 12);
+  doc.setFontSize(10);
+  doc.text(lines, 10, 20);
+  doc.save("ProMEL_AI_Report.pdf");
+}
+
+function exportAIReportToWord() {
+  const content = document.getElementById("ai-response-box")?.innerText || "";
+  if (!content.trim()) {
+    alert("No AI report available to export.");
+    return;
+  }
+
+  const html = `
+    <html>
+      <head><meta charset="utf-8"></head>
+      <body>
+        <h2>ProMEL AI Generated Report</h2>
+        <pre style="font-family:Arial; white-space:pre-wrap;">${content}</pre>
+      </body>
+    </html>
+  `;
+
+  const blob = new Blob([html], { type: "application/msword" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "ProMEL_AI_Report.doc";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+/* ======================================================
+   FIX B: SAFE AI VISUAL RENDERING (Charts)
+   ====================================================== */
+
+function renderAiVisuals(visuals) {
+  if (!visuals) return;
+
+  const barCanvas = document.getElementById("ai-vis-kpi-bar");
+  const donutCanvas = document.getElementById("ai-vis-distribution-donut");
+
+  if (!barCanvas || !donutCanvas) return;
+
+  const kpis = visuals.kpi_scores || [];
+  const dist = visuals.distribution || { good: 0, watch: 0, poor: 0 };
+
+  if (window.aiKpiBarChart) window.aiKpiBarChart.destroy();
+  if (window.aiDistDonutChart) window.aiDistDonutChart.destroy();
+
+  window.aiKpiBarChart = new Chart(barCanvas, {
+    type: "bar",
+    data: {
+      labels: kpis.map(k => k.label),
+      datasets: [{
+        label: "KPI Score (%)",
+        data: kpis.map(k => k.percent),
+        backgroundColor: kpis.map(k => chartColorForPercent(k.percent))
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: { y: { beginAtZero: true, max: 100 } }
+    }
+  });
+
+  window.aiDistDonutChart = new Chart(donutCanvas, {
+    type: "doughnut",
+    data: {
+      labels: ["On-track", "Watch", "Off-track"],
+      datasets: [{
+        data: [dist.good, dist.watch, dist.poor],
+        backgroundColor: [
+          getCssVar("--status-good"),
+          getCssVar("--status-warn"),
+          getCssVar("--status-bad")
+        ]
+      }]
+    },
+    options: { responsive: true }
+  });
+}
+</script>
+
   // ===== DATA ENTRY FORMS (DEMO HOOKS) =====
   function setupDataEntryForms() {
     const monForm = document.getElementById('monitoring-entry-form');
@@ -2613,6 +2735,8 @@ And distribution counts:
     }
   }
 </script>
-
 </body>
 </html>
+
+
+
