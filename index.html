@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>ProMEL Analytics Solutions | PMCEL Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     :root {
@@ -258,7 +258,7 @@
     .kpi-label { font-size: 0.75rem; color: #555; margin-bottom: 4px; }
     .kpi-value { font-size: 1.2rem; font-weight: bold; color: var(--primary); }
 
-    /* KPI traffic-light boxes (Monitoring + Evaluation + Overview) */
+    /* KPI traffic-light boxes */
     .kpi-box.kpi-good { background: var(--kpi-good-bg); border: 1px solid rgba(10, 122, 41, 0.25); }
     .kpi-box.kpi-warn { background: var(--kpi-warn-bg); border: 1px solid rgba(184, 134, 11, 0.28); }
     .kpi-box.kpi-bad  { background: var(--kpi-bad-bg);  border: 1px solid rgba(178, 34, 34, 0.25); }
@@ -281,21 +281,33 @@
       border-bottom: 1px solid #eee;
     }
 
-    /* Data entry forms */
-    .data-form {
+    /* ===========================
+       FIELD REPORTING HUB (Data Entry replacement)
+       =========================== */
+
+    .hub-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .hub-card {
       background: #f7f9ff;
       border-radius: 10px;
       padding: 10px 12px;
-      font-size: 0.8rem;
+      border: 1px solid #dde3f3;
+      font-size: 0.85rem;
     }
 
-    .data-form h3 { margin: 0 0 8px; font-size: 0.95rem; color: var(--primary); }
+    .hub-card h3 {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+      color: var(--primary);
+    }
 
-    .data-form label { display: block; margin-top: 6px; font-size: 0.8rem; }
-
-    .data-form input,
-    .data-form select,
-    .data-form textarea {
+    .hub-card label { display:block; margin-top: 6px; font-size: 0.8rem; }
+    .hub-card input, .hub-card select, .hub-card textarea {
       width: 100%;
       padding: 5px 6px;
       margin-top: 3px;
@@ -303,11 +315,16 @@
       border: 1px solid #ccc;
       font-size: 0.8rem;
     }
+    .hub-card textarea { resize: vertical; min-height: 80px; }
 
-    .data-form textarea { resize: vertical; min-height: 50px; }
-
-    .data-form button {
+    .hub-actions {
+      display:flex;
+      gap: 8px;
+      flex-wrap: wrap;
       margin-top: 10px;
+    }
+
+    .hub-actions button {
       padding: 6px 8px;
       border-radius: 6px;
       border: none;
@@ -316,12 +333,18 @@
       font-size: 0.8rem;
       cursor: pointer;
     }
-    .data-form button:hover { opacity: 0.9; }
+    .hub-actions button.secondary { background: #556b86; }
+    .hub-actions button.danger { background: #8a1f1f; }
+    .hub-actions button:hover { opacity: 0.9; }
 
-    canvas { max-width: 100%; }
+    .hub-status {
+      margin-top: 8px;
+      font-size: 0.75rem;
+      color: #555;
+    }
 
     /* ===========================
-       AI ASSISTANT (OPENAI) UI
+       AI ASSISTANT UI
        =========================== */
 
     .ai-chat-container {
@@ -336,6 +359,7 @@
       border-radius: 10px;
       padding: 10px 12px;
       font-size: 0.85rem;
+      border: 1px solid #dde3f3;
     }
 
     .ai-input-panel h3,
@@ -378,7 +402,7 @@
     .ai-inline-checkbox {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       margin-top: 8px;
       font-size: 0.8rem;
     }
@@ -387,7 +411,7 @@
       background: #ffffff;
       border-radius: 8px;
       min-height: 80px;
-      max-height: 320px;
+      max-height: 360px;
       overflow-y: auto;
       padding: 8px;
       border: 1px solid #dde3f3;
@@ -401,6 +425,8 @@
       .ai-chat-container { flex-direction: row; }
       .ai-input-panel, .ai-output-panel { flex: 1; }
     }
+
+    canvas { max-width: 100%; }
   </style>
 </head>
 
@@ -414,17 +440,17 @@
 
     <form id="login-form">
       <label for="login-username">Username</label>
-      <input id="login-username" type="text" required>
+      <input id="login-username" type="text" required />
 
       <label for="login-password">Password</label>
-      <input id="login-password" type="password" required>
+      <input id="login-password" type="password" required />
 
       <button type="submit" class="login-btn">Login</button>
     </form>
 
     <div class="login-hint">
-      Default (change later in code):<br>
-      <strong>Username:</strong> <code>admin</code><br>
+      Default (change later in code):<br />
+      <strong>Username:</strong> <code>admin</code><br />
       <strong>Password:</strong> <code>ProMEL@2025</code>
     </div>
   </div>
@@ -489,19 +515,15 @@
         <p>Monitoring and evaluation reporting hub.</p>
       </div>
 
+      <!-- ✅ UPDATED: Data Entry is now Field Reporting Hub -->
       <div class="card" onclick="openSection('dataentry')">
-        <h3>Data Entry</h3>
-        <p>Quick Monitoring &amp; Evaluation input forms.</p>
-      </div>
-
-      <div class="card" onclick="openSection('powerbi')">
-        <h3>Power BI Dashboard</h3>
-        <p>Integrated business intelligence view.</p>
+        <h3>Field Reporting Hub</h3>
+        <p>Submit field updates, sync to Sheets, and generate summaries.</p>
       </div>
 
       <div class="card" onclick="openSection('openai')">
         <h3>AI Assistant (OpenAI)</h3>
-        <p>Analyse trends &amp; generate MEL reports.</p>
+        <p>Analyse trends &amp; generate MEL outputs.</p>
       </div>
     </div>
 
@@ -539,7 +561,7 @@
         </div>
       </div>
 
-      <!-- ✅ NEW: OVERVIEW KPI TRAFFIC-LIGHT SUMMARY -->
+      <!-- ✅ OVERVIEW KPI TRAFFIC-LIGHT SUMMARY -->
       <div class="table-wrapper" style="margin-top:12px; padding:10px;">
         <strong style="font-size:0.85rem;">High Level Project Performance (Traffic-light, auto from filtered data)</strong>
 
@@ -601,8 +623,7 @@
       <h2>Monitoring &amp; Control – Live CSV Feed</h2>
       <p>
         The table below is populated from the ProMEL Monitoring Google Sheet published as a CSV link.
-        It is designed to be mobile friendly and scrollable on small screens. Filters at the top will
-        also reduce this table to the selected project/period/location.
+        Filters at the top will also reduce this table to the selected project/period/location.
       </p>
 
       <!-- Monitoring KPI Summary -->
@@ -699,7 +720,6 @@
       <h2>Evaluation – Live CSV Feed</h2>
       <p>
         The table below is populated from the Evaluation Google Sheet published as a CSV link.
-        It provides an overview of evaluation phase, overall rating, key findings and recommendations.
         Filters at the top adjust this table as well.
       </p>
 
@@ -806,74 +826,147 @@
         </div>
       </div>
 
-      <button class="close-btn" onclick="generatePDFReport()">Download PDF Summary</button>
-      <button class="close-btn" style="margin-left:6px;" onclick="closeSection('reports')">Close</button>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="close-btn" onclick="generatePDFReport()">Download PDF Summary</button>
+        <button class="close-btn" onclick="openSection('openai')">Open AI Assistant</button>
+        <button class="close-btn" style="margin-left:6px;" onclick="closeSection('reports')">Close</button>
+      </div>
+
+      <div class="info-note" style="margin-top:8px;">
+        Tip: Use the AI Assistant to generate donor narratives, survey tools, indicator lists, risk registers, evaluation TORs, and more.
+      </div>
     </div>
 
-    <!-- DATA ENTRY -->
+    <!-- ✅ UPDATED: FIELD REPORTING HUB (replaces old forms) -->
     <div id="dataentry" class="section">
-      <h2>Data Entry (Monitoring &amp; Evaluation)</h2>
+      <h2>Field Reporting Hub</h2>
       <p>
-        These forms are a front-end template. To send data directly into Google Sheets, connect
-        them to a Google Apps Script Web App or Google Form endpoint in the JavaScript code.
+        This hub connects field updates to your Google Sheets (Monitoring &amp; Evaluation), then refreshes the dashboard.
+        It can also send the submitted update to the AI Assistant to produce an instant summary, risks, and recommendations.
       </p>
 
-      <div class="kpi-grid">
-        <form id="monitoring-entry-form" class="data-form">
-          <h3>Monitoring Input</h3>
-          <label>Project Name <input name="projectName" required></label>
-          <label>Reporting Period <input name="reportingPeriod" placeholder="e.g. Quarter 4, 2025" required></label>
-          <label>Province / District / Location <input name="location"></label>
-          <label>Activity Implementation on Schedule (1–5) <input name="activityRating" type="number" min="1" max="5"></label>
-          <label>Budget Utilization as Planned (1–5) <input name="budgetRating" type="number" min="1" max="5"></label>
-          <label>Staff Availability (1–5) <input name="staffRating" type="number" min="1" max="5"></label>
-          <label>Community Participation (1–5) <input name="communityRating" type="number" min="1" max="5"></label>
-          <label>Coordination with Partners (1–5) <input name="coordinationRating" type="number" min="1" max="5"></label>
-          <label>Number of Beneficiaries Reached <input name="beneficiaries" type="number" min="0"></label>
-          <label>Main Achievements this Period <textarea name="achievements"></textarea></label>
-          <label>Key Challenges / Risks <textarea name="challenges"></textarea></label>
-          <label>Immediate Actions / Recommendations <textarea name="actions"></textarea></label>
-          <button type="submit">Submit Monitoring Entry (Demo)</button>
-        </form>
+      <div class="table-wrapper" style="padding:10px;">
+        <strong style="font-size:0.85rem;">How it works</strong>
+        <ol style="font-size:0.8rem; margin:8px 0 0 18px;">
+          <li>Fill a short field update (Monitoring or Evaluation).</li>
+          <li>Submit to Sheets (via Apps Script Web App endpoint).</li>
+          <li>Dashboard auto-refreshes Monitoring/Evaluation tables and KPIs.</li>
+          <li>Optional: send the same content to AI for instant analysis/report drafting.</li>
+        </ol>
+        <div class="info-note" style="margin-top:8px;">
+          Note: To fully enable submission, paste your Apps Script Web App URLs into the config constants in the JavaScript section.
+          If left blank, the hub will run in Demo mode (no network write).
+        </div>
+      </div>
 
-        <form id="evaluation-entry-form" class="data-form">
-          <h3>Evaluation Input</h3>
-          <label>Project Name <input name="evalProjectName" required></label>
-          <label>Evaluation Phase <input name="evalPhase" placeholder="Mid-term / Final / Review"></label>
-          <label>Outcome Rating (1–5) <input name="outcomeRating" type="number" min="1" max="5"></label>
-          <label>Impact Rating (1–5) <input name="impactRating" type="number" min="1" max="5"></label>
-          <label>Key Findings <textarea name="findings"></textarea></label>
-          <label>Recommendations <textarea name="evalRecommendations"></textarea></label>
-          <button type="submit">Submit Evaluation Entry (Demo)</button>
-        </form>
+      <div class="hub-grid">
+        <!-- Monitoring Field Update -->
+        <div class="hub-card">
+          <h3>Monitoring Field Update</h3>
+
+          <label>Project Name
+            <input id="hub-mon-project" placeholder="e.g. Function and Expenditure Review" />
+          </label>
+
+          <label>Reporting Period
+            <input id="hub-mon-period" placeholder="e.g. Quarter 4, 2025" />
+          </label>
+
+          <label>Province / District / Location
+            <input id="hub-mon-location" placeholder="e.g. National Capital District" />
+          </label>
+
+          <label>Reporting Date
+            <input id="hub-mon-date" placeholder="e.g. 12/29/2025" />
+          </label>
+
+          <label>Key Achievements (narrative)
+            <textarea id="hub-mon-ach" placeholder="What was achieved this period?"></textarea>
+          </label>
+
+          <label>Key Challenges / Risks
+            <textarea id="hub-mon-risk" placeholder="What challenges/risks occurred?"></textarea>
+          </label>
+
+          <label>Immediate Actions / Recommendations
+            <textarea id="hub-mon-act" placeholder="What immediate actions are needed?"></textarea>
+          </label>
+
+          <div class="hub-actions">
+            <button type="button" onclick="submitMonitoringHub(false)">Submit to Monitoring Sheet</button>
+            <button type="button" class="secondary" onclick="submitMonitoringHub(true)">Submit + Ask AI Summary</button>
+            <button type="button" class="danger" onclick="resetMonitoringHub()">Reset</button>
+          </div>
+
+          <div id="hub-mon-status" class="hub-status"></div>
+        </div>
+
+        <!-- Evaluation Field Update -->
+        <div class="hub-card">
+          <h3>Evaluation Field Update</h3>
+
+          <label>Project Name
+            <input id="hub-ev-project" placeholder="e.g. Function and Expenditure Review" />
+          </label>
+
+          <label>Reporting Period
+            <input id="hub-ev-period" placeholder="e.g. Quarter 4, 2025" />
+          </label>
+
+          <label>Evaluation Phase
+            <input id="hub-ev-phase" placeholder="e.g. Mid-term / Final / Review" />
+          </label>
+
+          <label>Key Findings (narrative)
+            <textarea id="hub-ev-findings" placeholder="What key findings were observed?"></textarea>
+          </label>
+
+          <label>Recommendations (narrative)
+            <textarea id="hub-ev-recs" placeholder="What recommendations are proposed?"></textarea>
+          </label>
+
+          <div class="hub-actions">
+            <button type="button" onclick="submitEvaluationHub(false)">Submit to Evaluation Sheet</button>
+            <button type="button" class="secondary" onclick="submitEvaluationHub(true)">Submit + Ask AI Summary</button>
+            <button type="button" class="danger" onclick="resetEvaluationHub()">Reset</button>
+          </div>
+
+          <div id="hub-ev-status" class="hub-status"></div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="hub-card">
+          <h3>Sync &amp; Automation</h3>
+          <p style="margin:0; font-size:0.8rem;">
+            Use these buttons to refresh live data and keep the dashboard up-to-date.
+          </p>
+
+          <div class="hub-actions" style="margin-top:10px;">
+            <button type="button" onclick="refreshAllData()">Refresh Monitoring + Evaluation</button>
+            <button type="button" class="secondary" onclick="openSection('monitoring')">Go to Monitoring</button>
+            <button type="button" class="secondary" onclick="openSection('evaluation')">Go to Evaluation</button>
+            <button type="button" class="secondary" onclick="openSection('openai')">Go to AI Assistant</button>
+          </div>
+
+          <div class="info-note" style="margin-top:10px;">
+            If you want “real-time field reporting”, the best practice is:
+            Google Form → Google Sheet → Dashboard CSV → AI Summaries &amp; PDFs.
+            This hub is a lightweight alternative for direct submission via Apps Script.
+          </div>
+
+          <div id="hub-sync-status" class="hub-status"></div>
+        </div>
       </div>
 
       <button class="close-btn" onclick="closeSection('dataentry')">Close</button>
     </div>
 
-    <!-- POWER BI -->
-    <div id="powerbi" class="section">
-      <h2>Power BI Dashboard</h2>
-      <p>
-        When your Power BI report is ready and published, you can embed it here using an
-        &lt;iframe&gt; from Power BI.
-      </p>
-
-      <div class="table-wrapper" style="text-align:center; padding:16px; border-style:dashed;">
-        Power BI embed placeholder.<br>
-        Replace this box with the Power BI &lt;iframe&gt; when available.
-      </div>
-
-      <button class="close-btn" onclick="closeSection('powerbi')">Close</button>
-    </div>
-
     <!-- OPENAI ASSISTANT -->
     <div id="openai" class="section">
-      <h2>AI Assistant (OpenAI) – ProMEL Reasoning &amp; Reports</h2>
+      <h2>AI Assistant (OpenAI) – ProMEL Reasoning &amp; MEL Outputs</h2>
       <p>
-        Use this assistant to interpret Monitoring &amp; Evaluation data, explain trends, and draft
-        narrative reports for donors or management. It sends your prompt and selected dashboard context
-        to a backend API endpoint.
+        Use this assistant for <strong>any MEL-related request</strong>: reports, survey tools, indicator design, logframes,
+        evaluation TORs, risk registers, summaries, recommendations, and data interpretation.
       </p>
 
       <div class="ai-chat-container">
@@ -882,21 +975,30 @@
 
           <label for="ai-mode">Analysis focus</label>
           <select id="ai-mode">
-            <option value="explain_trends">Explain current trends & risks</option>
-            <option value="draft_report">Draft narrative report (Monitoring & Evaluation)</option>
-            <option value="learning_summary">Summarise key lessons & recommendations</option>
-            <option value="design_questions">Design MEL questions / indicators</option>
-            <option value="custom">Custom analysis</option>
+            <option value="explain_trends">Explain trends & risks (data interpretation)</option>
+            <option value="draft_report">Draft narrative report (donor/management)</option>
+            <option value="learning_summary">Summarise lessons & recommendations</option>
+            <option value="design_questions">Design MEL questions / indicators / tools</option>
+            <option value="evaluation_plan">Evaluation plan / TOR / methodology</option>
+            <option value="risk_register">Risk register / mitigation</option>
+            <option value="custom" selected>Custom (any MEL query)</option>
+          </select>
+
+          <label for="ai-response-type">Response type</label>
+          <select id="ai-response-type">
+            <option value="json">Structured (JSON + visuals)</option>
+            <option value="text">Text only (fast)</option>
+            <option value="both">Both (JSON + readable narrative)</option>
           </select>
 
           <label for="ai-prompt">Prompt / question</label>
           <textarea
             id="ai-prompt"
-            placeholder="e.g. Explain the current status of the project based on the latest Monitoring & Evaluation data and highlight any critical risks."
+            placeholder="e.g. Generate 15 monitoring questions for a rural health project in WHP; include indicators and a simple scoring rubric."
           ></textarea>
 
           <div class="ai-inline-checkbox">
-            <input type="checkbox" id="ai-include-filters" checked>
+            <input type="checkbox" id="ai-include-filters" checked />
             <label for="ai-include-filters">Include current filters & KPI summary in analysis</label>
           </div>
 
@@ -908,14 +1010,13 @@
           </div>
 
           <div id="ai-status" class="info-note"></div>
-        </div><!-- ✅ FIX: close ai-input-panel properly -->
+        </div>
 
-        <!-- ✅ UPDATED (A): Output panel now includes AI visuals canvases -->
         <div class="ai-output-panel">
           <h3>AI Response</h3>
           <div id="ai-response-box"></div>
 
-          <!-- ✅ NEW: AI VISUALS (auto-rendered if backend returns chart JSON) -->
+          <!-- AI VISUALS -->
           <div style="margin-top:10px;">
             <div class="table-wrapper" style="margin:0; padding:8px;">
               <strong style="font-size:0.8rem;">AI Visual 1: Key KPI Scores (Traffic-light)</strong>
@@ -928,6 +1029,10 @@
             <div class="table-wrapper" style="margin-top:10px; padding:8px;">
               <strong style="font-size:0.8rem;">AI Visual 2: Record Distribution (Good/Watch/Poor)</strong>
               <canvas id="ai-vis-distribution-donut"></canvas>
+            </div>
+
+            <div class="info-note" style="margin-top:8px;">
+              Tip: Visuals are also reflected in the Overview/Monitoring/Evaluation KPI charts after you refresh or change filters.
             </div>
           </div>
         </div>
@@ -948,7 +1053,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-    /* =====================================================
+  /* =====================================================
      FIX: Redirect wrong GitHub Pages URL (/index.html/)
      ===================================================== */
   (function fixBadIndexSlashUrl() {
@@ -958,26 +1063,37 @@
     }
   })();
 
-  // (everything else stays exactly the same below)
+  // =====================================================
+  // CONFIG
+  // =====================================================
 
-  // ===========================
-  // CONFIG: AI BACKEND ENDPOINT (ONLINE - RAILWAY)
-  // ===========================
-  // ✅ IMPORTANT: use the full endpoint path (not localhost)
+  // ✅ AI backend endpoint (Railway)
   const AI_API_URL = "https://promel-ai-backend-production.up.railway.app/api/pas-ai-chat";
 
+  // ✅ OPTIONAL: Apps Script Web App endpoints for direct submission from Field Reporting Hub.
+  // If blank, Field Reporting Hub runs in DEMO mode (no write).
+  // Replace with your actual deployed Apps Script Web App URLs.
+  const MONITORING_APPS_SCRIPT_URL = ""; // e.g. https://script.google.com/macros/s/XXXX/exec
+  const EVALUATION_APPS_SCRIPT_URL = ""; // e.g. https://script.google.com/macros/s/XXXX/exec
+
+  // =====================================================
+  // GLOBAL STATE
+  // =====================================================
   let monitoringRows = [];
   let evaluationRows = [];
   let monitoringFilteredRows = [];
   let evaluationFilteredRows = [];
   let filtersInitialized = false;
 
+  // Overview charts
   let avgRatingsChart = null;
   let beneficiariesChart = null;
 
+  // Monitoring charts
   let monOverallByGroupChart = null;
   let monBenefByGroupChart = null;
 
+  // Evaluation chart
   let evalRatingsChart = null;
 
   // KPI traffic-light charts
@@ -986,13 +1102,17 @@
   let evalKpiBarChart = null;
   let evalKpiDonutChart = null;
 
-  // ✅ NEW: Overview traffic-light charts
+  // Overview traffic-light charts
   let ovKpiBarChart = null;
   let ovKpiDonutChart = null;
 
-  // ===========================
+  // AI charts
+  let aiKpiBarChart = null;
+  let aiDistDonutChart = null;
+
+  // =====================================================
   // LOGIN & INIT
-  // ===========================
+  // =====================================================
   document.addEventListener('DOMContentLoaded', function () {
     const loginScreen = document.getElementById('login-screen');
     const appRoot = document.getElementById('app-root');
@@ -1031,7 +1151,6 @@
     loadMonitoringTable();
     loadEvaluationTable();
     setupFilterListeners();
-    setupDataEntryForms();
     setupAutoRefresh();
   }
 
@@ -1056,7 +1175,9 @@
     if (el) el.style.display = 'none';
   }
 
-  // ===== CSV LOADERS =====
+  // =====================================================
+  // CSV LOADERS
+  // =====================================================
   function loadMonitoringTable() {
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQKiND_eb3gPR0spQHucadf14xH_rX5gRtpHShan_OWJqSThbHrcx8tqCa4V_3nXjqq3duum0i6XCSE/pub?gid=1298321526&single=true&output=csv";
 
@@ -1167,7 +1288,9 @@
     return rows.map(r => r.map(c => (c === undefined ? "" : String(c))));
   }
 
-  // ===== FILTERS =====
+  // =====================================================
+  // FILTERS
+  // =====================================================
   function setupFilterListeners() {
     if (filtersInitialized) return;
 
@@ -1266,7 +1389,6 @@
     updateMonitoringKPIs(monitorForView);
     updateEvaluationKPIs(evalForView);
 
-    // ✅ NEW: Overview traffic-light KPIs + charts
     updateOverviewKPIs(monitorForView, evalForView);
   }
 
@@ -1319,7 +1441,9 @@
     return [headerRow].concat(filteredDataRows);
   }
 
-  // ===== TABLE RENDERERS =====
+  // =====================================================
+  // TABLE RENDERERS
+  // =====================================================
   function renderMonitoringTable(rows) {
     const thead = document.getElementById('monitoring-head');
     const tbody = document.getElementById('monitoring-body');
@@ -1446,10 +1570,16 @@
     }
   }
 
-  // ===== KPI / CARD HELPERS =====
+  // =====================================================
+  // HELPERS
+  // =====================================================
   function setText(id, value) {
     const el = document.getElementById(id);
     if (el) el.textContent = value;
+  }
+
+  function safeLower(s) {
+    return (s || "").trim().toLowerCase();
   }
 
   function averageFieldFromRows(rows, headerRow, headerNameLower) {
@@ -1470,7 +1600,9 @@
     return count ? sum / count : 0;
   }
 
-  // ===== OVERVIEW CARD (existing counters) =====
+  // =====================================================
+  // OVERVIEW COUNTERS
+  // =====================================================
   function updateOverviewCard(monitorRows, evalRows) {
     if (!monitorRows || !monitorRows.length) return;
 
@@ -1522,7 +1654,9 @@
     setText('ov-overall-score', overallScore);
   }
 
-  // ===== LEARNING CARD =====
+  // =====================================================
+  // LEARNING
+  // =====================================================
   function updateLearningCard(monitorRows) {
     const list = document.getElementById('learning-list');
     if (!list) return;
@@ -1553,16 +1687,18 @@
       const act  = idxActions    !== -1 ? (row[idxActions]    || '') : '';
 
       li.innerHTML = `
-        <strong>${project}</strong> – ${period}<br>
-        ✅ ${ach}<br>
-        ⚠️ ${chal}<br>
-        📌 ${act}
+        <strong>${escapeHtml(project)}</strong> – ${escapeHtml(period)}<br>
+        ✅ ${escapeHtml(ach)}<br>
+        ⚠️ ${escapeHtml(chal)}<br>
+        📌 ${escapeHtml(act)}
       `;
       list.appendChild(li);
     });
   }
 
-  // ===== REPORTS CARD =====
+  // =====================================================
+  // REPORTS CARD
+  // =====================================================
   function updateReportsCard(monitorRows) {
     if (!monitorRows || !monitorRows.length) return;
 
@@ -1589,7 +1725,9 @@
     setText('rep-date', latestDate);
   }
 
-  // ===== CHARTS (Overview charts) =====
+  // =====================================================
+  // OVERVIEW CHARTS
+  // =====================================================
   function updateCharts(monitorRows) {
     const ctx1 = document.getElementById('chart-avg-ratings');
     const ctx2 = document.getElementById('chart-beneficiaries');
@@ -1665,13 +1803,9 @@
     });
   }
 
-  // ===========================
+  // =====================================================
   // Monitoring Summary Charts
-  // ===========================
-  function safeLower(s) {
-    return (s || "").trim().toLowerCase();
-  }
-
+  // =====================================================
   function parseMonthKey(dateStr) {
     if (!dateStr) return "";
     const s = String(dateStr).trim();
@@ -1820,9 +1954,9 @@
     });
   }
 
-  // ===========================
+  // =====================================================
   // Evaluation Charts
-  // ===========================
+  // =====================================================
   function updateEvaluationCharts(evalRows) {
     const canvas = document.getElementById("eval-chart-ratings");
     if (!canvas) return;
@@ -1873,9 +2007,9 @@
     });
   }
 
-  // ===========================
+  // =====================================================
   // Traffic-light KPI Engine
-  // ===========================
+  // =====================================================
   function getCssVar(name) {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   }
@@ -2149,13 +2283,12 @@
     });
   }
 
-  // ✅ NEW: Overview KPIs (Monitoring + Evaluation + Combined)
+  // ----- Overview KPIs (Monitoring + Evaluation + Combined) -----
   function updateOverviewKPIs(monitorRows, evalRows) {
     const barCanvas = document.getElementById("ov-kpi-bar");
     const donutCanvas = document.getElementById("ov-kpi-donut");
     if (!barCanvas || !donutCanvas) return;
 
-    // --- Monitoring overall % (from monitoring rows)
     let monOverallPct = 0;
     let monBad = 0, monWarn = 0, monGood = 0;
 
@@ -2185,7 +2318,6 @@
 
       monOverallPct = pcts.length ? Math.round(pcts.reduce((a, x) => a + x, 0) / pcts.length) : 0;
 
-      // Distribution counts (row-level)
       const dataRows = monitorRows.slice(1).filter(r => !r.every(c => String(c || "").trim() === ""));
       dataRows.forEach(row => {
         const vals = [];
@@ -2203,7 +2335,6 @@
       });
     }
 
-    // --- Evaluation outcome/impact/performance % and distribution counts
     let evOutcomePct = 0, evImpactPct = 0, evPerfPct = 0;
     let evBad = 0, evWarn = 0, evGood = 0;
 
@@ -2257,27 +2388,23 @@
       });
     }
 
-    // --- Combined Project Performance %
     const comboParts = [];
     if (monOverallPct > 0) comboParts.push(monOverallPct);
     if (evPerfPct > 0) comboParts.push(evPerfPct);
     const combinedPct = comboParts.length ? Math.round(comboParts.reduce((a, x) => a + x, 0) / comboParts.length) : 0;
 
-    // Update KPI texts
     setText("ov-kpi-monitoring", monOverallPct + "%");
     setText("ov-kpi-evalperf", evPerfPct + "%");
     setText("ov-kpi-outcome", evOutcomePct + "%");
     setText("ov-kpi-impact", evImpactPct + "%");
     setText("ov-kpi-combined", combinedPct + "%");
 
-    // Apply status styling
     applyKpiStatus("ov-kpi-monitoring-box", "ov-kpi-monitoring", monOverallPct);
     applyKpiStatus("ov-kpi-evalperf-box", "ov-kpi-evalperf", evPerfPct);
     applyKpiStatus("ov-kpi-outcome-box", "ov-kpi-outcome", evOutcomePct);
     applyKpiStatus("ov-kpi-impact-box", "ov-kpi-impact", evImpactPct);
     applyKpiStatus("ov-kpi-combined-box", "ov-kpi-combined", combinedPct);
 
-    // Bar chart
     const barLabels = ["Monitoring", "Evaluation", "Outcome", "Impact", "Combined"];
     const barData = [monOverallPct, evPerfPct, evOutcomePct, evImpactPct, combinedPct];
     const barColors = barData.map(p => chartColorForPercent(p));
@@ -2299,7 +2426,6 @@
       }
     });
 
-    // Doughnut chart (combined distribution counts)
     const totalBad = monBad + evBad;
     const totalWarn = monWarn + evWarn;
     const totalGood = monGood + evGood;
@@ -2322,7 +2448,9 @@
     });
   }
 
-  // ===== PDF REPORT =====
+  // =====================================================
+  // PDF EXPORT (Overview)
+  // =====================================================
   function generatePDFReport() {
     try {
       const jsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
@@ -2356,10 +2484,9 @@
     }
   }
 
-  /* ======================================================
-     FIX A: AI REPORT EXPORT (PDF + WORD)
-     ====================================================== */
-
+  // =====================================================
+  // AI REPORT EXPORT (PDF + WORD)
+  // =====================================================
   function exportAIReportToPDF() {
     const jsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
     if (!jsPDF) {
@@ -2377,16 +2504,16 @@
     const lines = doc.splitTextToSize(content, 180);
 
     doc.setFontSize(12);
-    doc.text("ProMEL AI Generated Report", 10, 12);
+    doc.text("ProMEL AI Generated Output", 10, 12);
     doc.setFontSize(10);
     doc.text(lines, 10, 20);
-    doc.save("ProMEL_AI_Report.pdf");
+    doc.save("ProMEL_AI_Output.pdf");
   }
 
   function exportAIReportToWord() {
     const content = document.getElementById("ai-response-box")?.innerText || "";
     if (!content.trim()) {
-      alert("No AI report available to export.");
+      alert("No AI output available to export.");
       return;
     }
 
@@ -2394,8 +2521,8 @@
       <html>
         <head><meta charset="utf-8"></head>
         <body>
-          <h2>ProMEL AI Generated Report</h2>
-          <pre style="font-family:Arial; white-space:pre-wrap;">${content}</pre>
+          <h2>ProMEL AI Generated Output</h2>
+          <pre style="font-family:Arial; white-space:pre-wrap;">${escapeHtml(content)}</pre>
         </body>
       </html>
     `;
@@ -2403,88 +2530,18 @@
     const blob = new Blob([html], { type: "application/msword" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "ProMEL_AI_Report.doc";
+    link.download = "ProMEL_AI_Output.doc";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   }
 
-  // ===== DATA ENTRY FORMS (DEMO HOOKS) =====
-  function setupDataEntryForms() {
-    const monForm = document.getElementById('monitoring-entry-form');
-    const evalForm = document.getElementById('evaluation-entry-form');
-
-    if (monForm) {
-      monForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        alert('Monitoring entry captured in the browser.\n\nTo send this to Google Sheets, connect this form to a Google Apps Script Web App endpoint.');
-      });
-    }
-
-    if (evalForm) {
-      evalForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        alert('Evaluation entry captured in the browser.\n\nTo send this to Google Sheets, connect this form to a Google Apps Script Web App endpoint.');
-      });
-    }
-  }
-
-  // ===========================
-  // ✅ NEW (B): AI Snapshot + Row Sampling + Visual Renderer
-  // ===========================
-  let aiKpiBarChart = null;
-  let aiDistDonutChart = null;
-
+  // =====================================================
+  // AI VISUALS RENDERING
+  // =====================================================
   function safeNum(v) {
     const n = parseFloat(v);
     return isNaN(n) ? null : n;
-  }
-
-  function rowsToObjects(rows) {
-    if (!rows || rows.length <= 1) return [];
-    const headers = rows[0].map(h => String(h || '').trim());
-    const objs = [];
-    for (let i = 1; i < rows.length; i++) {
-      const r = rows[i];
-      if (!r || r.every(c => String(c || '').trim() === '')) continue;
-      const obj = {};
-      headers.forEach((h, idx) => obj[h] = (r[idx] ?? '').toString().trim());
-      objs.push(obj);
-    }
-    return objs;
-  }
-
-  function takeLastN(objs, n) {
-    if (!Array.isArray(objs)) return [];
-    if (objs.length <= n) return objs;
-    return objs.slice(objs.length - n);
-  }
-
-  function buildKpiSnapshot() {
-    return {
-      totalProjects: document.getElementById('ov-total-projects')?.textContent || '0',
-      totalMonitoring: document.getElementById('ov-total-monitoring')?.textContent || '0',
-      totalEvaluation: document.getElementById('ov-total-evaluation')?.textContent || '0',
-      totalBeneficiaries: document.getElementById('ov-total-beneficiaries')?.textContent || '0',
-      overallScore: document.getElementById('ov-overall-score')?.textContent || '0',
-
-      monitoringOverallPct: document.getElementById('ov-kpi-monitoring')?.textContent || '0%',
-      evaluationPerfPct: document.getElementById('ov-kpi-evalperf')?.textContent || '0%',
-      outcomePct: document.getElementById('ov-kpi-outcome')?.textContent || '0%',
-      impactPct: document.getElementById('ov-kpi-impact')?.textContent || '0%',
-      combinedPct: document.getElementById('ov-kpi-combined')?.textContent || '0%'
-    };
-  }
-
-  function tryParseJson(text) {
-    if (!text) return null;
-    const t = String(text).trim();
-    const unfenced = t
-      .replace(/^```json/i, '')
-      .replace(/^```/i, '')
-      .replace(/```$/i, '')
-      .trim();
-    try { return JSON.parse(unfenced); } catch { return null; }
   }
 
   function renderAiVisuals(visuals) {
@@ -2534,18 +2591,71 @@
     });
   }
 
-  // ===== AI ASSISTANT (FRONTEND HOOK, WIRED TO RAILWAY BACKEND) =====
+  // =====================================================
+  // AI SNAPSHOT + ROW SAMPLING
+  // =====================================================
+  function rowsToObjects(rows) {
+    if (!rows || rows.length <= 1) return [];
+    const headers = rows[0].map(h => String(h || '').trim());
+    const objs = [];
+    for (let i = 1; i < rows.length; i++) {
+      const r = rows[i];
+      if (!r || r.every(c => String(c || '').trim() === '')) continue;
+      const obj = {};
+      headers.forEach((h, idx) => obj[h] = (r[idx] ?? '').toString().trim());
+      objs.push(obj);
+    }
+    return objs;
+  }
+
+  function takeLastN(objs, n) {
+    if (!Array.isArray(objs)) return [];
+    if (objs.length <= n) return objs;
+    return objs.slice(objs.length - n);
+  }
+
+  function buildKpiSnapshot() {
+    return {
+      totalProjects: document.getElementById('ov-total-projects')?.textContent || '0',
+      totalMonitoring: document.getElementById('ov-total-monitoring')?.textContent || '0',
+      totalEvaluation: document.getElementById('ov-total-evaluation')?.textContent || '0',
+      totalBeneficiaries: document.getElementById('ov-total-beneficiaries')?.textContent || '0',
+      overallScore: document.getElementById('ov-overall-score')?.textContent || '0',
+
+      monitoringOverallPct: document.getElementById('ov-kpi-monitoring')?.textContent || '0%',
+      evaluationPerfPct: document.getElementById('ov-kpi-evalperf')?.textContent || '0%',
+      outcomePct: document.getElementById('ov-kpi-outcome')?.textContent || '0%',
+      impactPct: document.getElementById('ov-kpi-impact')?.textContent || '0%',
+      combinedPct: document.getElementById('ov-kpi-combined')?.textContent || '0%'
+    };
+  }
+
+  function tryParseJson(text) {
+    if (!text) return null;
+    const t = String(text).trim();
+    const unfenced = t
+      .replace(/^```json/i, '')
+      .replace(/^```/i, '')
+      .replace(/```$/i, '')
+      .trim();
+    try { return JSON.parse(unfenced); } catch { return null; }
+  }
+
+  // =====================================================
+  // AI ASSISTANT (Flexible MEL)
+  // =====================================================
   async function sendToAIAssistant() {
     const modeEl = document.getElementById('ai-mode');
+    const typeEl = document.getElementById('ai-response-type');
     const promptEl = document.getElementById('ai-prompt');
     const includeFiltersEl = document.getElementById('ai-include-filters');
     const statusEl = document.getElementById('ai-status');
     const responseBox = document.getElementById('ai-response-box');
 
-    // The button inside the AI input panel (the one that calls this function)
     const buttonEl = document.querySelector('#openai .ai-input-panel button');
 
     const mode = modeEl ? modeEl.value : 'custom';
+    const respType = typeEl ? typeEl.value : 'json';
     const prompt = (promptEl ? promptEl.value : '').trim();
     const includeFilters = includeFiltersEl ? includeFiltersEl.checked : true;
 
@@ -2554,32 +2664,29 @@
       return;
     }
 
-    // Current filter context
     const project = document.getElementById('filter-project')?.value || '';
     const period = document.getElementById('filter-period')?.value || '';
     const location = document.getElementById('filter-location')?.value || '';
 
-    // Build record samples so AI can read narrative fields
     const monitorForView = monitoringFilteredRows.length ? monitoringFilteredRows : monitoringRows;
     const evalForView = evaluationFilteredRows.length ? evaluationFilteredRows : evaluationRows;
 
     const monitoringObjects = rowsToObjects(monitorForView);
     const evaluationObjects = rowsToObjects(evalForView);
 
-    // Take last 8 records
     const monitoring_sample = takeLastN(monitoringObjects, 8);
     const evaluation_sample = takeLastN(evaluationObjects, 8);
 
-    // KPI snapshot
     const kpi_snapshot = buildKpiSnapshot();
 
-    // Ask backend to return strict JSON (for visuals)
-    const aiInstruction = `
-Return your answer as STRICT JSON (no markdown) with this schema:
+    // ✅ Flexible instructions (not report-only)
+    const aiInstructionJson = `
+Return STRICT JSON (no markdown) using this schema:
 
 {
-  "report_title": "string",
-  "report_markdown": "string (use headings, bullet points, short paragraphs)",
+  "title": "string",
+  "narrative": "string (short paragraphs + bullets, readable)",
+  "outputs": ["string", "..."], 
   "key_findings": ["string", "..."],
   "recommendations": ["string", "..."],
   "visuals": {
@@ -2588,30 +2695,29 @@ Return your answer as STRICT JSON (no markdown) with this schema:
   }
 }
 
-Use monitoring_sample and evaluation_sample narrative fields:
-- Main achievements this period.
-- Key challenges / risks.
-- Immediate actions required / recommendations.
-- Reporting date and reporting period.
+Rules:
+- Support ANY MEL request: reports, survey questions, indicators, logframes, evaluation TORs, risk registers, donor narrative, summaries.
+- Use monitoring_sample and evaluation_sample narrative fields where helpful.
+- If visuals are relevant, include kpi_scores and distribution. If not relevant, return empty arrays and zeros.
+- Keep outputs practical and ready-to-use.
+`.trim();
 
-Also compute the KPI scores (%):
-- Activity, Budget, Staff, Community, Coordination (from monitoring ratings 1–5 scaled to %)
-- Outcome, Impact, Performance (from evaluation ratings 1–5 scaled to %)
-And distribution counts:
-- good = avg rating >= 4
-- watch = avg rating == 3
-- poor = avg rating <= 2
+    const aiInstructionText = `
+Return a clear, structured answer (no JSON required).
+Support ANY MEL request: reports, survey questions, indicators, logframes, evaluation TORs, risk registers, donor narrative, summaries.
+Use monitoring_sample and evaluation_sample narrative fields where helpful.
+Keep it practical and ready-to-use.
 `.trim();
 
     const payload = {
-      message: `[Mode: ${mode}] ${prompt}\n\n${aiInstruction}`,
+      message: `[Mode: ${mode}] ${prompt}\n\n${respType === "text" ? aiInstructionText : aiInstructionJson}`,
       filters: includeFilters ? { project, period, location } : {},
       kpi_snapshot: includeFilters ? kpi_snapshot : {},
       monitoring_sample: includeFilters ? monitoring_sample : [],
-      evaluation_sample: includeFilters ? evaluation_sample : []
+      evaluation_sample: includeFilters ? evaluation_sample : [],
+      response_format: respType // server can ignore, but kept for future
     };
 
-    // UI: show loading state
     if (statusEl) statusEl.textContent = 'ProMEL AI is analysing your request…';
     if (responseBox) responseBox.textContent = '';
     if (buttonEl) {
@@ -2629,8 +2735,8 @@ And distribution counts:
       let data;
       try {
         data = await res.json();
-      } catch (parseErr) {
-        throw new Error('Could not read AI response (invalid JSON).');
+      } catch {
+        throw new Error('Could not read AI response (invalid JSON from backend).');
       }
 
       if (!res.ok) {
@@ -2640,13 +2746,23 @@ And distribution counts:
         return;
       }
 
-      // Parse JSON reply and render visuals; fallback to text mode
       if (data.success) {
         const rawReply = data.reply || '';
+
+        if (respType === "text") {
+          if (responseBox) responseBox.textContent = rawReply || '(No reply text returned)';
+          if (statusEl) statusEl.textContent = 'AI output generated (text).';
+          return;
+        }
+
+        // JSON or BOTH
         const parsed = tryParseJson(rawReply);
 
         if (parsed) {
-          const title = parsed.report_title ? `# ${parsed.report_title}\n\n` : '';
+          const title = parsed.title ? `# ${parsed.title}\n\n` : '';
+          const outputs = Array.isArray(parsed.outputs) && parsed.outputs.length
+            ? `## Outputs\n- ${parsed.outputs.join('\n- ')}\n\n`
+            : '';
           const findings = Array.isArray(parsed.key_findings) && parsed.key_findings.length
             ? `## Key Findings\n- ${parsed.key_findings.join('\n- ')}\n\n`
             : '';
@@ -2654,18 +2770,22 @@ And distribution counts:
             ? `## Recommendations\n- ${parsed.recommendations.join('\n- ')}\n\n`
             : '';
 
-          const narrative = (title + (parsed.report_markdown || '') + '\n\n' + findings + recs).trim();
+          let narrative = (title + (parsed.narrative || '') + '\n\n' + outputs + findings + recs).trim();
+
+          if (respType === "both") {
+            // include compact JSON at bottom for transparency (optional)
+            narrative += `\n\n---\n(Structured data received for visuals.)`;
+          }
 
           if (responseBox) responseBox.textContent = narrative || '(No narrative returned)';
 
-          // Render visuals
-          renderAiVisuals(parsed.visuals);
+          renderAiVisuals(parsed.visuals || {});
 
-          if (statusEl) statusEl.textContent = 'AI report + visuals generated.';
+          if (statusEl) statusEl.textContent = 'AI output + visuals generated.';
         } else {
-          // Fallback: show raw text if backend didn't return JSON
+          // Fallback to text
           if (responseBox) responseBox.textContent = rawReply || '(No reply text returned)';
-          if (statusEl) statusEl.textContent = 'AI response received (text mode).';
+          if (statusEl) statusEl.textContent = 'AI response received (text fallback).';
         }
       } else {
         if (statusEl) statusEl.textContent = 'AI error: ' + (data.error || 'Unknown error from backend');
@@ -2676,13 +2796,231 @@ And distribution counts:
       if (statusEl) statusEl.textContent = 'Network or backend error. Please try again.';
       if (responseBox) responseBox.textContent = err.message || String(err);
     } finally {
-      // Reset button state
       if (buttonEl) {
         buttonEl.disabled = false;
         buttonEl.textContent = 'Ask ProMEL AI';
       }
     }
   }
+
+  // =====================================================
+  // FIELD REPORTING HUB (Data Entry replacement)
+  // =====================================================
+  function nowDateFallback() {
+    const d = new Date();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    const yy = d.getFullYear();
+    return `${mm}/${dd}/${yy}`;
+  }
+
+  async function postToAppsScript(url, payload) {
+    // Apps Script Web Apps often accept JSON POST with content-type application/json.
+    // If your script expects form-encoded, you can adjust later.
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    let out = null;
+    try { out = await res.json(); } catch { /* ignore */ }
+    if (!res.ok) throw new Error(out?.error || `HTTP ${res.status}`);
+    return out || { ok: true };
+  }
+
+  function refreshAllData() {
+    const el = document.getElementById("hub-sync-status");
+    if (el) el.textContent = "Refreshing data…";
+    loadMonitoringTable();
+    loadEvaluationTable();
+    setTimeout(() => {
+      if (el) el.textContent = "Refresh triggered. Data will update as CSV loads.";
+    }, 600);
+  }
+
+  function resetMonitoringHub() {
+    setVal("hub-mon-project", "");
+    setVal("hub-mon-period", "");
+    setVal("hub-mon-location", "");
+    setVal("hub-mon-date", "");
+    setVal("hub-mon-ach", "");
+    setVal("hub-mon-risk", "");
+    setVal("hub-mon-act", "");
+    setHubStatus("hub-mon-status", "Reset complete.");
+  }
+
+  function resetEvaluationHub() {
+    setVal("hub-ev-project", "");
+    setVal("hub-ev-period", "");
+    setVal("hub-ev-phase", "");
+    setVal("hub-ev-findings", "");
+    setVal("hub-ev-recs", "");
+    setHubStatus("hub-ev-status", "Reset complete.");
+  }
+
+  function setVal(id, v) {
+    const el = document.getElementById(id);
+    if (el) el.value = v;
+  }
+
+  function setHubStatus(id, msg) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = msg;
+  }
+
+  function getVal(id) {
+    return document.getElementById(id)?.value?.trim() || "";
+  }
+
+  async function submitMonitoringHub(andAskAI) {
+    const project = getVal("hub-mon-project");
+    const period = getVal("hub-mon-period");
+    const location = getVal("hub-mon-location");
+    const date = getVal("hub-mon-date") || nowDateFallback();
+    const ach = getVal("hub-mon-ach");
+    const risk = getVal("hub-mon-risk");
+    const act = getVal("hub-mon-act");
+
+    if (!project || !period) {
+      setHubStatus("hub-mon-status", "Please enter at least Project Name and Reporting Period.");
+      return;
+    }
+
+    const payload = {
+      type: "monitoring",
+      projectName: project,
+      reportingPeriod: period,
+      location,
+      reportingDate: date,
+      achievements: ach,
+      challenges: risk,
+      actions: act
+    };
+
+    setHubStatus("hub-mon-status", "Submitting…");
+
+    try {
+      if (!MONITORING_APPS_SCRIPT_URL) {
+        // Demo mode
+        setHubStatus("hub-mon-status", "DEMO mode: submission captured locally (no Apps Script URL set). Refreshing dashboard…");
+      } else {
+        await postToAppsScript(MONITORING_APPS_SCRIPT_URL, payload);
+        setHubStatus("hub-mon-status", "Submitted to Monitoring Sheet successfully. Refreshing dashboard…");
+      }
+
+      refreshAllData();
+
+      // Optionally ask AI summary
+      if (andAskAI) {
+        openSection("openai");
+        // prefill AI prompt
+        const aiPrompt = `
+Summarise this field monitoring update and produce:
+1) Current status (1 paragraph)
+2) Key achievements (bullets)
+3) Risks/challenges + mitigation (bullets)
+4) Immediate actions (bullets)
+5) A short donor/management-ready note (short paragraph)
+
+Field Update:
+Project: ${project}
+Period: ${period}
+Location: ${location}
+Date: ${date}
+Achievements: ${ach}
+Risks/Challenges: ${risk}
+Actions: ${act}
+`.trim();
+        setVal("ai-prompt", aiPrompt);
+        // default to "both" for readable + visuals
+        const t = document.getElementById("ai-response-type");
+        if (t) t.value = "both";
+        const m = document.getElementById("ai-mode");
+        if (m) m.value = "draft_report";
+        // run
+        await sendToAIAssistant();
+      }
+    } catch (e) {
+      console.error(e);
+      setHubStatus("hub-mon-status", "Error: " + (e.message || String(e)));
+    }
+  }
+
+  async function submitEvaluationHub(andAskAI) {
+    const project = getVal("hub-ev-project");
+    const period = getVal("hub-ev-period");
+    const phase = getVal("hub-ev-phase");
+    const findings = getVal("hub-ev-findings");
+    const recs = getVal("hub-ev-recs");
+
+    if (!project || !period) {
+      setHubStatus("hub-ev-status", "Please enter at least Project Name and Reporting Period.");
+      return;
+    }
+
+    const payload = {
+      type: "evaluation",
+      projectName: project,
+      reportingPeriod: period,
+      evaluationPhase: phase,
+      findings,
+      recommendations: recs
+    };
+
+    setHubStatus("hub-ev-status", "Submitting…");
+
+    try {
+      if (!EVALUATION_APPS_SCRIPT_URL) {
+        setHubStatus("hub-ev-status", "DEMO mode: submission captured locally (no Apps Script URL set). Refreshing dashboard…");
+      } else {
+        await postToAppsScript(EVALUATION_APPS_SCRIPT_URL, payload);
+        setHubStatus("hub-ev-status", "Submitted to Evaluation Sheet successfully. Refreshing dashboard…");
+      }
+
+      refreshAllData();
+
+      if (andAskAI) {
+        openSection("openai");
+        const aiPrompt = `
+Convert this evaluation update into:
+1) Evaluation summary (short paragraph)
+2) Key findings (bullets)
+3) Recommendations (bullets)
+4) Proposed follow-up actions and timeline (bullets)
+5) A short donor-ready narrative (short paragraph)
+
+Evaluation Update:
+Project: ${project}
+Period: ${period}
+Phase: ${phase}
+Findings: ${findings}
+Recommendations: ${recs}
+`.trim();
+        setVal("ai-prompt", aiPrompt);
+        const t = document.getElementById("ai-response-type");
+        if (t) t.value = "both";
+        const m = document.getElementById("ai-mode");
+        if (m) m.value = "evaluation_plan";
+        await sendToAIAssistant();
+      }
+    } catch (e) {
+      console.error(e);
+      setHubStatus("hub-ev-status", "Error: " + (e.message || String(e)));
+    }
+  }
+
+  // =====================================================
+  // HTML ESCAPE (safety for innerHTML)
+  // =====================================================
+  function escapeHtml(str) {
+    return String(str ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
 </script>
+
 </body>
 </html>
