@@ -2544,51 +2544,69 @@
     return isNaN(n) ? null : n;
   }
 
+  // ✅ UPDATED: robust visuals handling (supports empty visuals + clears charts cleanly)
   function renderAiVisuals(visuals) {
     const barCanvas = document.getElementById('ai-vis-kpi-bar');
     const donutCanvas = document.getElementById('ai-vis-distribution-donut');
     if (!barCanvas || !donutCanvas) return;
 
+    // Always destroy previous charts first
+    if (aiKpiBarChart) { aiKpiBarChart.destroy(); aiKpiBarChart = null; }
+    if (aiDistDonutChart) { aiDistDonutChart.destroy(); aiDistDonutChart = null; }
+
+    // Clear canvases (prevents stale drawings on some browsers)
+    barCanvas.width = barCanvas.width;
+    donutCanvas.width = donutCanvas.width;
+
     const kpiScores = visuals?.kpi_scores || [];
     const dist = visuals?.distribution || { good: 0, watch: 0, poor: 0 };
 
-    const labels = kpiScores.map(x => x.label || 'KPI');
-    const data = kpiScores.map(x => Math.max(0, Math.min(100, safeNum(x.percent) ?? 0)));
-    const colors = data.map(p => chartColorForPercent(p));
+    // KPI BAR
+    if (Array.isArray(kpiScores) && kpiScores.length > 0) {
+      const labels = kpiScores.map(x => x.label || 'KPI');
+      const data = kpiScores.map(x => Math.max(0, Math.min(100, safeNum(x.percent) ?? 0)));
+      const colors = data.map(p => chartColorForPercent(p));
 
-    if (aiKpiBarChart) aiKpiBarChart.destroy();
-    aiKpiBarChart = new Chart(barCanvas, {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [{
-          label: 'KPI Score (%)',
-          data,
-          backgroundColor: colors
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: { y: { beginAtZero: true, max: 100 } }
-      }
-    });
+      aiKpiBarChart = new Chart(barCanvas, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'KPI Score (%)',
+            data,
+            backgroundColor: colors
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true, max: 100 } }
+        }
+      });
+    }
 
-    if (aiDistDonutChart) aiDistDonutChart.destroy();
-    aiDistDonutChart = new Chart(donutCanvas, {
-      type: 'doughnut',
-      data: {
-        labels: ['On-track / Good', 'Moderate / Watch', 'Off-track / Poor'],
-        datasets: [{
-          data: [dist.good || 0, dist.watch || 0, dist.poor || 0],
-          backgroundColor: [
-            getCssVar('--status-good'),
-            getCssVar('--status-warn'),
-            getCssVar('--status-bad')
-          ]
-        }]
-      },
-      options: { responsive: true }
-    });
+    // DISTRIBUTION DONUT
+    const good = Number(dist.good || 0);
+    const watch = Number(dist.watch || 0);
+    const poor = Number(dist.poor || 0);
+    const total = good + watch + poor;
+
+    if (total > 0) {
+      aiDistDonutChart = new Chart(donutCanvas, {
+        type: 'doughnut',
+        data: {
+          labels: ['On-track / Good', 'Moderate / Watch', 'Off-track / Poor'],
+          datasets: [{
+            data: [good, watch, poor],
+            backgroundColor: [
+              getCssVar('--status-good'),
+              getCssVar('--status-warn'),
+              getCssVar('--status-bad')
+            ]
+          }]
+        },
+        options: { responsive: true }
+      });
+    }
   }
 
   // =====================================================
@@ -2743,6 +2761,8 @@ Keep it practical and ready-to-use.
         const apiError = data?.error || `HTTP ${res.status}`;
         if (statusEl) statusEl.textContent = 'Error from ProMEL AI backend.';
         if (responseBox) responseBox.textContent = apiError;
+        // ✅ clear visuals on error
+        renderAiVisuals({});
         return;
       }
 
@@ -2752,6 +2772,8 @@ Keep it practical and ready-to-use.
         if (respType === "text") {
           if (responseBox) responseBox.textContent = rawReply || '(No reply text returned)';
           if (statusEl) statusEl.textContent = 'AI output generated (text).';
+          // ✅ even in text mode, clear visuals (optional)
+          renderAiVisuals({});
           return;
         }
 
@@ -2773,28 +2795,35 @@ Keep it practical and ready-to-use.
           let narrative = (title + (parsed.narrative || '') + '\n\n' + outputs + findings + recs).trim();
 
           if (respType === "both") {
-            // include compact JSON at bottom for transparency (optional)
             narrative += `\n\n---\n(Structured data received for visuals.)`;
           }
 
           if (responseBox) responseBox.textContent = narrative || '(No narrative returned)';
 
-          renderAiVisuals(parsed.visuals || {});
-
+          // ✅ UPDATED: visuals can come from parsed JSON OR backend top-level data.visuals
+          renderAiVisuals(parsed.visuals || data.visuals || {});
           if (statusEl) statusEl.textContent = 'AI output + visuals generated.';
         } else {
           // Fallback to text
           if (responseBox) responseBox.textContent = rawReply || '(No reply text returned)';
+
+          // ✅ UPDATED: if backend returns visuals separately, still render them
+          renderAiVisuals(data.visuals || {});
+
           if (statusEl) statusEl.textContent = 'AI response received (text fallback).';
         }
       } else {
         if (statusEl) statusEl.textContent = 'AI error: ' + (data.error || 'Unknown error from backend');
         if (responseBox) responseBox.textContent = '';
+        // ✅ clear visuals if AI says not success
+        renderAiVisuals({});
       }
     } catch (err) {
       console.error('Error calling ProMEL AI endpoint:', err);
       if (statusEl) statusEl.textContent = 'Network or backend error. Please try again.';
       if (responseBox) responseBox.textContent = err.message || String(err);
+      // ✅ clear visuals on network error
+      renderAiVisuals({});
     } finally {
       if (buttonEl) {
         buttonEl.disabled = false;
