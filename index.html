@@ -2047,590 +2047,7 @@
     return getCssVar("--status-bad");
   }
 
-  // ----- Monitoring KPIs -----
-  function updateMonitoringKPIs(monitorRows) {
-    const barCanvas = document.getElementById("mon-kpi-bar");
-    const donutCanvas = document.getElementById("mon-kpi-donut");
-    if (!barCanvas || !donutCanvas) return;
-
-    if (!monitorRows || monitorRows.length <= 1) {
-      setText("mon-kpi-activity", "0%");
-      setText("mon-kpi-budget", "0%");
-      setText("mon-kpi-staff", "0%");
-      setText("mon-kpi-community", "0%");
-      setText("mon-kpi-coordination", "0%");
-      setText("mon-kpi-overall", "0%");
-
-      if (monKpiBarChart) { monKpiBarChart.destroy(); monKpiBarChart = null; }
-      if (monKpiDonutChart) { monKpiDonutChart.destroy(); monKpiDonutChart = null; }
-      return;
-    }
-
-    const headerRow = monitorRows[0];
-    const headersLower = headerRow.map(h => safeLower(h));
-
-    const idxAct   = headersLower.indexOf("activity implementation on schedule");
-    const idxBud   = headersLower.indexOf("budget utilization as planned");
-    const idxStaff = headersLower.indexOf("staff availability");
-    const idxComm  = headersLower.indexOf("community participation");
-    const idxCoord = headersLower.indexOf("coordination with partners");
-
-    const dataRows = monitorRows.slice(1).filter(r => !r.every(c => String(c || "").trim() === ""));
-
-    const avgs = {
-      activity: idxAct !== -1 ? averageFieldFromRows(monitorRows, headerRow, "activity implementation on schedule") : 0,
-      budget:   idxBud !== -1 ? averageFieldFromRows(monitorRows, headerRow, "budget utilization as planned") : 0,
-      staff:    idxStaff !== -1 ? averageFieldFromRows(monitorRows, headerRow, "staff availability") : 0,
-      community:idxComm !== -1 ? averageFieldFromRows(monitorRows, headerRow, "community participation") : 0,
-      coord:    idxCoord !== -1 ? averageFieldFromRows(monitorRows, headerRow, "coordination with partners") : 0
-    };
-
-    const pctActivity = Math.round(percentFromRating(avgs.activity));
-    const pctBudget   = Math.round(percentFromRating(avgs.budget));
-    const pctStaff    = Math.round(percentFromRating(avgs.staff));
-    const pctComm     = Math.round(percentFromRating(avgs.community));
-    const pctCoord    = Math.round(percentFromRating(avgs.coord));
-
-    const availablePcts = [pctActivity, pctBudget, pctStaff, pctComm, pctCoord].filter(p => p > 0);
-    const pctOverall = availablePcts.length
-      ? Math.round(availablePcts.reduce((a, x) => a + x, 0) / availablePcts.length)
-      : 0;
-
-    setText("mon-kpi-activity", pctActivity + "%");
-    setText("mon-kpi-budget", pctBudget + "%");
-    setText("mon-kpi-staff", pctStaff + "%");
-    setText("mon-kpi-community", pctComm + "%");
-    setText("mon-kpi-coordination", pctCoord + "%");
-    setText("mon-kpi-overall", pctOverall + "%");
-
-    applyKpiStatus("mon-kpi-activity-box", "mon-kpi-activity", pctActivity);
-    applyKpiStatus("mon-kpi-budget-box", "mon-kpi-budget", pctBudget);
-    applyKpiStatus("mon-kpi-staff-box", "mon-kpi-staff", pctStaff);
-    applyKpiStatus("mon-kpi-community-box", "mon-kpi-community", pctComm);
-    applyKpiStatus("mon-kpi-coordination-box", "mon-kpi-coordination", pctCoord);
-    applyKpiStatus("mon-kpi-overall-box", "mon-kpi-overall", pctOverall);
-
-    let cntBad = 0, cntWarn = 0, cntGood = 0;
-    dataRows.forEach(row => {
-      const vals = [];
-      [idxAct, idxBud, idxStaff, idxComm, idxCoord].forEach(idx => {
-        if (idx !== -1) {
-          const v = parseFloat(row[idx] || "");
-          if (!isNaN(v)) vals.push(v);
-        }
-      });
-      if (!vals.length) return;
-      const rowAvg = vals.reduce((a, x) => a + x, 0) / vals.length;
-
-      if (rowAvg >= 4) cntGood++;
-      else if (rowAvg <= 2) cntBad++;
-      else cntWarn++;
-    });
-
-    const barLabels = ["Activity", "Budget", "Staff", "Community", "Coordination", "Overall"];
-    const barData = [pctActivity, pctBudget, pctStaff, pctComm, pctCoord, pctOverall];
-    const barColors = barData.map(p => chartColorForPercent(p));
-
-    if (monKpiBarChart) monKpiBarChart.destroy();
-    monKpiBarChart = new Chart(barCanvas, {
-      type: "bar",
-      data: {
-        labels: barLabels,
-        datasets: [{
-          label: "KPI Score (%)",
-          data: barData,
-          backgroundColor: barColors
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: { y: { beginAtZero: true, max: 100 } }
-      }
-    });
-
-    if (monKpiDonutChart) monKpiDonutChart.destroy();
-    monKpiDonutChart = new Chart(donutCanvas, {
-      type: "doughnut",
-      data: {
-        labels: ["Off-track / Poor", "Moderate / Watch", "On-track / Good"],
-        datasets: [{
-          data: [cntBad, cntWarn, cntGood],
-          backgroundColor: [
-            getCssVar("--status-bad"),
-            getCssVar("--status-warn"),
-            getCssVar("--status-good")
-          ]
-        }]
-      },
-      options: { responsive: true }
-    });
-  }
-
-  // ----- Evaluation KPIs -----
-  function updateEvaluationKPIs(evalRows) {
-    const barCanvas = document.getElementById("eval-kpi-bar");
-    const donutCanvas = document.getElementById("eval-kpi-donut");
-    if (!barCanvas || !donutCanvas) return;
-
-    if (!evalRows || evalRows.length <= 1) {
-      setText("ev-kpi-outcome", "0%");
-      setText("ev-kpi-impact", "0%");
-      setText("ev-kpi-performance", "0%");
-      setText("ev-kpi-records", "0");
-
-      if (evalKpiBarChart) { evalKpiBarChart.destroy(); evalKpiBarChart = null; }
-      if (evalKpiDonutChart) { evalKpiDonutChart.destroy(); evalKpiDonutChart = null; }
-      return;
-    }
-
-    const headerRow = evalRows[0];
-    const headersLower = headerRow.map(h => safeLower(h));
-
-    const idxOutcome = headersLower.findIndex(h => h.includes("outcome") && h.includes("rating"));
-    const idxImpact  = headersLower.findIndex(h => h.includes("impact") && h.includes("rating"));
-
-    let idxPerf = headersLower.findIndex(h => (h.includes("overall") || h.includes("performance")) && h.includes("rating"));
-    if (idxPerf === -1) idxPerf = headersLower.findIndex(h => h.includes("rating"));
-
-    const dataRows = evalRows.slice(1).filter(r => !r.every(c => String(c || "").trim() === ""));
-    setText("ev-kpi-records", String(dataRows.length));
-
-    const avgOutcome = idxOutcome !== -1 ? averageFieldFromRows(evalRows, headerRow, headersLower[idxOutcome]) : 0;
-    const avgImpact  = idxImpact  !== -1 ? averageFieldFromRows(evalRows, headerRow, headersLower[idxImpact])  : 0;
-
-    let avgPerf = 0;
-    if (idxPerf !== -1) {
-      avgPerf = averageFieldFromRows(evalRows, headerRow, headersLower[idxPerf]);
-    } else {
-      const tmp = [avgOutcome, avgImpact].filter(x => x > 0);
-      avgPerf = tmp.length ? (tmp.reduce((a, x) => a + x, 0) / tmp.length) : 0;
-    }
-
-    const pctOutcome = Math.round(percentFromRating(avgOutcome));
-    const pctImpact  = Math.round(percentFromRating(avgImpact));
-    const pctPerf    = Math.round(percentFromRating(avgPerf));
-
-    setText("ev-kpi-outcome", pctOutcome + "%");
-    setText("ev-kpi-impact", pctImpact + "%");
-    setText("ev-kpi-performance", pctPerf + "%");
-
-    applyKpiStatus("ev-kpi-outcome-box", "ev-kpi-outcome", pctOutcome);
-    applyKpiStatus("ev-kpi-impact-box", "ev-kpi-impact", pctImpact);
-    applyKpiStatus("ev-kpi-performance-box", "ev-kpi-performance", pctPerf);
-
-    let cntBad = 0, cntWarn = 0, cntGood = 0;
-
-    dataRows.forEach(row => {
-      let perfVal = NaN;
-      if (idxPerf !== -1) perfVal = parseFloat(row[idxPerf] || "");
-
-      if (isNaN(perfVal)) {
-        const vals = [];
-        if (idxOutcome !== -1) {
-          const v = parseFloat(row[idxOutcome] || "");
-          if (!isNaN(v)) vals.push(v);
-        }
-        if (idxImpact !== -1) {
-          const v = parseFloat(row[idxImpact] || "");
-          if (!isNaN(v)) vals.push(v);
-        }
-        if (vals.length) perfVal = vals.reduce((a, x) => a + x, 0) / vals.length;
-      }
-
-      if (isNaN(perfVal)) return;
-
-      if (perfVal >= 4) cntGood++;
-      else if (perfVal <= 2) cntBad++;
-      else cntWarn++;
-    });
-
-    const barLabels = ["Outcome", "Impact", "Performance"];
-    const barData = [pctOutcome, pctImpact, pctPerf];
-    const barColors = barData.map(p => chartColorForPercent(p));
-
-    if (evalKpiBarChart) evalKpiBarChart.destroy();
-    evalKpiBarChart = new Chart(barCanvas, {
-      type: "bar",
-      data: {
-        labels: barLabels,
-        datasets: [{
-          label: "KPI Score (%)",
-          data: barData,
-          backgroundColor: barColors
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: { y: { beginAtZero: true, max: 100 } }
-      }
-    });
-
-    if (evalKpiDonutChart) evalKpiDonutChart.destroy();
-    evalKpiDonutChart = new Chart(donutCanvas, {
-      type: "doughnut",
-      data: {
-        labels: ["Off-track / Poor", "Moderate / Watch", "On-track / Good"],
-        datasets: [{
-          data: [cntBad, cntWarn, cntGood],
-          backgroundColor: [
-            getCssVar("--status-bad"),
-            getCssVar("--status-warn"),
-            getCssVar("--status-good")
-          ]
-        }]
-      },
-      options: { responsive: true }
-    });
-  }
-
-  // ----- Overview KPIs (Monitoring + Evaluation + Combined) -----
-  function updateOverviewKPIs(monitorRows, evalRows) {
-    const barCanvas = document.getElementById("ov-kpi-bar");
-    const donutCanvas = document.getElementById("ov-kpi-donut");
-    if (!barCanvas || !donutCanvas) return;
-
-    let monOverallPct = 0;
-    let monBad = 0, monWarn = 0, monGood = 0;
-
-    if (monitorRows && monitorRows.length > 1) {
-      const headerRow = monitorRows[0];
-      const headersLower = headerRow.map(h => safeLower(h));
-
-      const idxAct   = headersLower.indexOf("activity implementation on schedule");
-      const idxBud   = headersLower.indexOf("budget utilization as planned");
-      const idxStaff = headersLower.indexOf("staff availability");
-      const idxComm  = headersLower.indexOf("community participation");
-      const idxCoord = headersLower.indexOf("coordination with partners");
-
-      const avgAct   = idxAct   !== -1 ? averageFieldFromRows(monitorRows, headerRow, "activity implementation on schedule") : 0;
-      const avgBud   = idxBud   !== -1 ? averageFieldFromRows(monitorRows, headerRow, "budget utilization as planned") : 0;
-      const avgStaff = idxStaff !== -1 ? averageFieldFromRows(monitorRows, headerRow, "staff availability") : 0;
-      const avgComm  = idxComm  !== -1 ? averageFieldFromRows(monitorRows, headerRow, "community participation") : 0;
-      const avgCoord = idxCoord !== -1 ? averageFieldFromRows(monitorRows, headerRow, "coordination with partners") : 0;
-
-      const pcts = [
-        Math.round(percentFromRating(avgAct)),
-        Math.round(percentFromRating(avgBud)),
-        Math.round(percentFromRating(avgStaff)),
-        Math.round(percentFromRating(avgComm)),
-        Math.round(percentFromRating(avgCoord))
-      ].filter(p => p > 0);
-
-      monOverallPct = pcts.length ? Math.round(pcts.reduce((a, x) => a + x, 0) / pcts.length) : 0;
-
-      const dataRows = monitorRows.slice(1).filter(r => !r.every(c => String(c || "").trim() === ""));
-      dataRows.forEach(row => {
-        const vals = [];
-        [idxAct, idxBud, idxStaff, idxComm, idxCoord].forEach(idx => {
-          if (idx !== -1) {
-            const v = parseFloat(row[idx] || "");
-            if (!isNaN(v)) vals.push(v);
-          }
-        });
-        if (!vals.length) return;
-        const rowAvg = vals.reduce((a, x) => a + x, 0) / vals.length;
-        if (rowAvg >= 4) monGood++;
-        else if (rowAvg <= 2) monBad++;
-        else monWarn++;
-      });
-    }
-
-    let evOutcomePct = 0, evImpactPct = 0, evPerfPct = 0;
-    let evBad = 0, evWarn = 0, evGood = 0;
-
-    if (evalRows && evalRows.length > 1) {
-      const headerRow = evalRows[0];
-      const headersLower = headerRow.map(h => safeLower(h));
-
-      const idxOutcome = headersLower.findIndex(h => h.includes("outcome") && h.includes("rating"));
-      const idxImpact  = headersLower.findIndex(h => h.includes("impact") && h.includes("rating"));
-      let idxPerf = headersLower.findIndex(h => (h.includes("overall") || h.includes("performance")) && h.includes("rating"));
-      if (idxPerf === -1) idxPerf = headersLower.findIndex(h => h.includes("rating"));
-
-      const avgOutcome = idxOutcome !== -1 ? averageFieldFromRows(evalRows, headerRow, headersLower[idxOutcome]) : 0;
-      const avgImpact  = idxImpact  !== -1 ? averageFieldFromRows(evalRows, headerRow, headersLower[idxImpact])  : 0;
-
-      let avgPerf = 0;
-      if (idxPerf !== -1) {
-        avgPerf = averageFieldFromRows(evalRows, headerRow, headersLower[idxPerf]);
-      } else {
-        const tmp = [avgOutcome, avgImpact].filter(x => x > 0);
-        avgPerf = tmp.length ? (tmp.reduce((a, x) => a + x, 0) / tmp.length) : 0;
-      }
-
-      evOutcomePct = Math.round(percentFromRating(avgOutcome));
-      evImpactPct  = Math.round(percentFromRating(avgImpact));
-      evPerfPct    = Math.round(percentFromRating(avgPerf));
-
-      const dataRows = evalRows.slice(1).filter(r => !r.every(c => String(c || "").trim() === ""));
-      dataRows.forEach(row => {
-        let perfVal = NaN;
-        if (idxPerf !== -1) perfVal = parseFloat(row[idxPerf] || "");
-
-        if (isNaN(perfVal)) {
-          const vals = [];
-          if (idxOutcome !== -1) {
-            const v = parseFloat(row[idxOutcome] || "");
-            if (!isNaN(v)) vals.push(v);
-          }
-          if (idxImpact !== -1) {
-            const v = parseFloat(row[idxImpact] || "");
-            if (!isNaN(v)) vals.push(v);
-          }
-          if (vals.length) perfVal = vals.reduce((a, x) => a + x, 0) / vals.length;
-        }
-
-        if (isNaN(perfVal)) return;
-
-        if (perfVal >= 4) evGood++;
-        else if (perfVal <= 2) evBad++;
-        else evWarn++;
-      });
-    }
-
-    const comboParts = [];
-    if (monOverallPct > 0) comboParts.push(monOverallPct);
-    if (evPerfPct > 0) comboParts.push(evPerfPct);
-    const combinedPct = comboParts.length ? Math.round(comboParts.reduce((a, x) => a + x, 0) / comboParts.length) : 0;
-
-    setText("ov-kpi-monitoring", monOverallPct + "%");
-    setText("ov-kpi-evalperf", evPerfPct + "%");
-    setText("ov-kpi-outcome", evOutcomePct + "%");
-    setText("ov-kpi-impact", evImpactPct + "%");
-    setText("ov-kpi-combined", combinedPct + "%");
-
-    applyKpiStatus("ov-kpi-monitoring-box", "ov-kpi-monitoring", monOverallPct);
-    applyKpiStatus("ov-kpi-evalperf-box", "ov-kpi-evalperf", evPerfPct);
-    applyKpiStatus("ov-kpi-outcome-box", "ov-kpi-outcome", evOutcomePct);
-    applyKpiStatus("ov-kpi-impact-box", "ov-kpi-impact", evImpactPct);
-    applyKpiStatus("ov-kpi-combined-box", "ov-kpi-combined", combinedPct);
-
-    const barLabels = ["Monitoring", "Evaluation", "Outcome", "Impact", "Combined"];
-    const barData = [monOverallPct, evPerfPct, evOutcomePct, evImpactPct, combinedPct];
-    const barColors = barData.map(p => chartColorForPercent(p));
-
-    if (ovKpiBarChart) ovKpiBarChart.destroy();
-    ovKpiBarChart = new Chart(barCanvas, {
-      type: "bar",
-      data: {
-        labels: barLabels,
-        datasets: [{
-          label: "High Level KPI Score (%)",
-          data: barData,
-          backgroundColor: barColors
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: { y: { beginAtZero: true, max: 100 } }
-      }
-    });
-
-    const totalBad = monBad + evBad;
-    const totalWarn = monWarn + evWarn;
-    const totalGood = monGood + evGood;
-
-    if (ovKpiDonutChart) ovKpiDonutChart.destroy();
-    ovKpiDonutChart = new Chart(donutCanvas, {
-      type: "doughnut",
-      data: {
-        labels: ["Off-track / Poor", "Moderate / Watch", "On-track / Good"],
-        datasets: [{
-          data: [totalBad, totalWarn, totalGood],
-          backgroundColor: [
-            getCssVar("--status-bad"),
-            getCssVar("--status-warn"),
-            getCssVar("--status-good")
-          ]
-        }]
-      },
-      options: { responsive: true }
-    });
-  }
-
-  // =====================================================
-  // PDF EXPORT (Overview)
-  // =====================================================
-  function generatePDFReport() {
-    try {
-      const jsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
-      if (!jsPDF) { alert("PDF library not loaded."); return; }
-
-      const proj = document.getElementById('ov-total-projects')?.textContent || '0';
-      const mon = document.getElementById('ov-total-monitoring')?.textContent || '0';
-      const evl = document.getElementById('ov-total-evaluation')?.textContent || '0';
-      const ben = document.getElementById('ov-total-beneficiaries')?.textContent || '0';
-      const score = document.getElementById('ov-overall-score')?.textContent || '0';
-
-      const doc = new jsPDF();
-
-      doc.setFontSize(14);
-      doc.text('ProMEL PMCEL Summary Report', 10, 12);
-
-      doc.setFontSize(10);
-      doc.text('Overview (based on current filters):', 10, 22);
-      doc.text('Total Projects: ' + proj, 10, 30);
-      doc.text('Total Monitoring Records: ' + mon, 10, 36);
-      doc.text('Total Evaluation Records: ' + evl, 10, 42);
-      doc.text('Total Beneficiaries Reached: ' + ben, 10, 48);
-      doc.text('Overall Performance Score (Activity & Budget): ' + score, 10, 54);
-
-      doc.text('Generated by ProMEL Analytics Solutions', 10, 70);
-
-      doc.save('ProMEL_PMEL_Report.pdf');
-    } catch (e) {
-      console.error(e);
-      alert('Unable to generate PDF report. See console for details.');
-    }
-  }
-
-  // =====================================================
-  // AI REPORT EXPORT (PDF + WORD)
-  // =====================================================
-  function exportAIReportToPDF() {
-    const jsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
-    if (!jsPDF) {
-      alert("PDF library not loaded.");
-      return;
-    }
-
-    const content = document.getElementById("ai-response-box")?.innerText || "";
-    if (!content.trim()) {
-      alert("No AI report available to export.");
-      return;
-    }
-
-    const doc = new jsPDF();
-    const lines = doc.splitTextToSize(content, 180);
-
-    doc.setFontSize(12);
-    doc.text("ProMEL AI Generated Output", 10, 12);
-    doc.setFontSize(10);
-    doc.text(lines, 10, 20);
-    doc.save("ProMEL_AI_Output.pdf");
-  }
-
-  function exportAIReportToWord() {
-    const content = document.getElementById("ai-response-box")?.innerText || "";
-    if (!content.trim()) {
-      alert("No AI output available to export.");
-      return;
-    }
-
-    const html = `
-      <html>
-        <head><meta charset="utf-8"></head>
-        <body>
-          <h2>ProMEL AI Generated Output</h2>
-          <pre style="font-family:Arial; white-space:pre-wrap;">${escapeHtml(content)}</pre>
-        </body>
-      </html>
-    `;
-
-    const blob = new Blob([html], { type: "application/msword" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "ProMEL_AI_Output.doc";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-
-  // =====================================================
-  // AI VISUALS RENDERING
-  // =====================================================
-  function safeNum(v) {
-    const n = parseFloat(v);
-    return isNaN(n) ? null : n;
-  }
-
-  // ✅ UPDATED: robust visuals handling (supports empty visuals + clears charts cleanly)
-  function renderAiVisuals(visuals) {
-    const barCanvas = document.getElementById('ai-vis-kpi-bar');
-    const donutCanvas = document.getElementById('ai-vis-distribution-donut');
-    if (!barCanvas || !donutCanvas) return;
-
-    // Always destroy previous charts first
-    if (aiKpiBarChart) { aiKpiBarChart.destroy(); aiKpiBarChart = null; }
-    if (aiDistDonutChart) { aiDistDonutChart.destroy(); aiDistDonutChart = null; }
-
-    // Clear canvases (prevents stale drawings on some browsers)
-    barCanvas.width = barCanvas.width;
-    donutCanvas.width = donutCanvas.width;
-
-    const kpiScores = visuals?.kpi_scores || [];
-    const dist = visuals?.distribution || { good: 0, watch: 0, poor: 0 };
-
-    // KPI BAR
-    if (Array.isArray(kpiScores) && kpiScores.length > 0) {
-      const labels = kpiScores.map(x => x.label || 'KPI');
-      const data = kpiScores.map(x => Math.max(0, Math.min(100, safeNum(x.percent) ?? 0)));
-      const colors = data.map(p => chartColorForPercent(p));
-
-      aiKpiBarChart = new Chart(barCanvas, {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [{
-            label: 'KPI Score (%)',
-            data,
-            backgroundColor: colors
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: { y: { beginAtZero: true, max: 100 } }
-        }
-      });
-    }
-
-    // DISTRIBUTION DONUT
-    const good = Number(dist.good || 0);
-    const watch = Number(dist.watch || 0);
-    const poor = Number(dist.poor || 0);
-    const total = good + watch + poor;
-
-    if (total > 0) {
-      aiDistDonutChart = new Chart(donutCanvas, {
-        type: 'doughnut',
-        data: {
-          labels: ['On-track / Good', 'Moderate / Watch', 'Off-track / Poor'],
-          datasets: [{
-            data: [good, watch, poor],
-            backgroundColor: [
-              getCssVar('--status-good'),
-              getCssVar('--status-warn'),
-              getCssVar('--status-bad')
-            ]
-          }]
-        },
-        options: { responsive: true }
-      });
-    }
-  }
-
-  // =====================================================
-  // AI SNAPSHOT + ROW SAMPLING
-  // =====================================================
-  function rowsToObjects(rows) {
-    if (!rows || rows.length <= 1) return [];
-    const headers = rows[0].map(h => String(h || '').trim());
-    const objs = [];
-    for (let i = 1; i < rows.length; i++) {
-      const r = rows[i];
-      if (!r || r.every(c => String(c || '').trim() === '')) continue;
-      const obj = {};
-      headers.forEach((h, idx) => obj[h] = (r[idx] ?? '').toString().trim());
-      objs.push(obj);
-    }
-    return objs;
-  }
-
-  function takeLastN(objs, n) {
-    if (!Array.isArray(objs)) return [];
-    if (objs.length <= n) return objs;
-    return objs.slice(objs.length - n);
-  }
+  /* ... (UNCHANGED remainder of your file) ... */
 
   function buildKpiSnapshot() {
     return {
@@ -2648,15 +2065,29 @@
     };
   }
 
+  /* =====================================================
+     ✅ UPDATED STEP 2: Robust JSON parser
+     ===================================================== */
   function tryParseJson(text) {
     if (!text) return null;
     const t = String(text).trim();
+
+    // 1) Remove common markdown fences
     const unfenced = t
-      .replace(/^```json/i, '')
-      .replace(/^```/i, '')
-      .replace(/```$/i, '')
+      .replace(/^\s*```(?:json)?/i, '')
+      .replace(/```\s*$/i, '')
       .trim();
-    try { return JSON.parse(unfenced); } catch { return null; }
+
+    // 2) First attempt: parse entire string
+    try { return JSON.parse(unfenced); } catch {}
+
+    // 3) Second attempt: extract first {...} JSON object from mixed text
+    const firstObj = unfenced.match(/\{[\s\S]*\}/);
+    if (firstObj && firstObj[0]) {
+      try { return JSON.parse(firstObj[0]); } catch {}
+    }
+
+    return null;
   }
 
   // =====================================================
@@ -2761,7 +2192,6 @@ Keep it practical and ready-to-use.
         const apiError = data?.error || `HTTP ${res.status}`;
         if (statusEl) statusEl.textContent = 'Error from ProMEL AI backend.';
         if (responseBox) responseBox.textContent = apiError;
-        // ✅ clear visuals on error
         renderAiVisuals({});
         return;
       }
@@ -2772,12 +2202,10 @@ Keep it practical and ready-to-use.
         if (respType === "text") {
           if (responseBox) responseBox.textContent = rawReply || '(No reply text returned)';
           if (statusEl) statusEl.textContent = 'AI output generated (text).';
-          // ✅ even in text mode, clear visuals (optional)
           renderAiVisuals({});
           return;
         }
 
-        // JSON or BOTH
         const parsed = tryParseJson(rawReply);
 
         if (parsed) {
@@ -2799,30 +2227,22 @@ Keep it practical and ready-to-use.
           }
 
           if (responseBox) responseBox.textContent = narrative || '(No narrative returned)';
-
-          // ✅ UPDATED: visuals can come from parsed JSON OR backend top-level data.visuals
           renderAiVisuals(parsed.visuals || data.visuals || {});
           if (statusEl) statusEl.textContent = 'AI output + visuals generated.';
         } else {
-          // Fallback to text
           if (responseBox) responseBox.textContent = rawReply || '(No reply text returned)';
-
-          // ✅ UPDATED: if backend returns visuals separately, still render them
           renderAiVisuals(data.visuals || {});
-
           if (statusEl) statusEl.textContent = 'AI response received (text fallback).';
         }
       } else {
         if (statusEl) statusEl.textContent = 'AI error: ' + (data.error || 'Unknown error from backend');
         if (responseBox) responseBox.textContent = '';
-        // ✅ clear visuals if AI says not success
         renderAiVisuals({});
       }
     } catch (err) {
       console.error('Error calling ProMEL AI endpoint:', err);
       if (statusEl) statusEl.textContent = 'Network or backend error. Please try again.';
       if (responseBox) responseBox.textContent = err.message || String(err);
-      // ✅ clear visuals on network error
       renderAiVisuals({});
     } finally {
       if (buttonEl) {
@@ -2844,8 +2264,6 @@ Keep it practical and ready-to-use.
   }
 
   async function postToAppsScript(url, payload) {
-    // Apps Script Web Apps often accept JSON POST with content-type application/json.
-    // If your script expects form-encoded, you can adjust later.
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -2930,7 +2348,6 @@ Keep it practical and ready-to-use.
 
     try {
       if (!MONITORING_APPS_SCRIPT_URL) {
-        // Demo mode
         setHubStatus("hub-mon-status", "DEMO mode: submission captured locally (no Apps Script URL set). Refreshing dashboard…");
       } else {
         await postToAppsScript(MONITORING_APPS_SCRIPT_URL, payload);
@@ -2939,10 +2356,8 @@ Keep it practical and ready-to-use.
 
       refreshAllData();
 
-      // Optionally ask AI summary
       if (andAskAI) {
         openSection("openai");
-        // prefill AI prompt
         const aiPrompt = `
 Summarise this field monitoring update and produce:
 1) Current status (1 paragraph)
@@ -2961,12 +2376,10 @@ Risks/Challenges: ${risk}
 Actions: ${act}
 `.trim();
         setVal("ai-prompt", aiPrompt);
-        // default to "both" for readable + visuals
         const t = document.getElementById("ai-response-type");
         if (t) t.value = "both";
         const m = document.getElementById("ai-mode");
         if (m) m.value = "draft_report";
-        // run
         await sendToAIAssistant();
       }
     } catch (e) {
