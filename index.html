@@ -1,3 +1,4 @@
+﻿<!-- ProMEL Dashboard Updated: 2026-01-14 14:36:58 -->
 <!-- ProMEL Dashboard Updated: AI fixes 14 Jan 2026 -->
 
 <!DOCTYPE html>
@@ -600,9 +601,9 @@
 
         <div class="legend" style="margin-top:10px;">
           <strong>Traffic-light key:</strong>
-          <span class="status-bad">0–40% Off-track / Poor</span>
-          <span class="status-warn">41–60% Moderate / Watch</span>
-          <span class="status-good">61–100% On-track / Good</span>
+          <span class="status-bad">0â€“40% Off-track / Poor</span>
+          <span class="status-warn">41â€“60% Moderate / Watch</span>
+          <span class="status-good">61â€“100% On-track / Good</span>
         </div>
       </div>
 
@@ -619,7 +620,7 @@
 
     <!-- MONITORING -->
     <div id="monitoring" class="section">
-      <h2>Monitoring &amp; Control – Live CSV Feed</h2>
+      <h2>Monitoring &amp; Control â€“ Live CSV Feed</h2>
       <p>
         The table below is populated from the ProMEL Monitoring Google Sheet published as a CSV link.
         Filters at the top will also reduce this table to the selected project/period/location.
@@ -668,9 +669,9 @@
 
         <div class="legend" style="margin-top:10px;">
           <strong>Traffic-light key:</strong>
-          <span class="status-bad">0–40% Off-track / Poor</span>
-          <span class="status-warn">41–60% Moderate / Watch</span>
-          <span class="status-good">61–100% On-track / Good</span>
+          <span class="status-bad">0â€“40% Off-track / Poor</span>
+          <span class="status-warn">41â€“60% Moderate / Watch</span>
+          <span class="status-good">61â€“100% On-track / Good</span>
         </div>
       </div>
 
@@ -699,10 +700,10 @@
       </div>
 
       <div class="legend">
-        <strong>Monitoring rating colour key (1–5):</strong>
-        <span class="status-bad">1–2 = Off-track / Poor</span>
+        <strong>Monitoring rating colour key (1â€“5):</strong>
+        <span class="status-bad">1â€“2 = Off-track / Poor</span>
         <span class="status-warn">3 = Moderate / Watch</span>
-        <span class="status-good">4–5 = On-track / Good</span>
+        <span class="status-good">4â€“5 = On-track / Good</span>
       </div>
 
       <div class="info-note">
@@ -714,7 +715,7 @@
 
     <!-- EVALUATION -->
     <div id="evaluation" class="section">
-      <h2>Evaluation – Live CSV Feed</h2>
+      <h2>Evaluation â€“ Live CSV Feed</h2>
       <p>
         The table below is populated from the Evaluation Google Sheet published as a CSV link.
         Filters at the top adjust this table as well.
@@ -755,9 +756,9 @@
 
         <div class="legend" style="margin-top:10px;">
           <strong>Traffic-light key:</strong>
-          <span class="status-bad">0–40% Off-track / Poor</span>
-          <span class="status-warn">41–60% Moderate / Watch</span>
-          <span class="status-good">61–100% On-track / Good</span>
+          <span class="status-bad">0â€“40% Off-track / Poor</span>
+          <span class="status-warn">41â€“60% Moderate / Watch</span>
+          <span class="status-good">61â€“100% On-track / Good</span>
         </div>
       </div>
 
@@ -769,15 +770,15 @@
       </div>
 
       <div class="table-wrapper" style="margin-top:12px;">
-        <strong style="font-size:0.85rem;">Evaluation Summary – Average Ratings</strong>
+        <strong style="font-size:0.85rem;">Evaluation Summary â€“ Average Ratings</strong>
         <canvas id="eval-chart-ratings"></canvas>
       </div>
 
       <div class="legend">
-        <strong>Evaluation rating colour key (1–5):</strong>
-        <span class="status-bad">1–2 = Weak / Unsatisfactory</span>
+        <strong>Evaluation rating colour key (1â€“5):</strong>
+        <span class="status-bad">1â€“2 = Weak / Unsatisfactory</span>
         <span class="status-warn">3 = Fair / Needs improvement</span>
-        <span class="status-good">4–5 = Good / Strong</span>
+        <span class="status-good">4â€“5 = Good / Strong</span>
       </div>
 
       <div class="info-note">
@@ -943,8 +944,8 @@
           </div>
 
           <div class="info-note" style="margin-top:10px;">
-            If you want “real-time field reporting”, the best practice is:
-            Google Form → Google Sheet → Dashboard CSV → AI Summaries &amp; PDFs.
+            If you want â€œreal-time field reportingâ€, the best practice is:
+            Google Form â†’ Google Sheet â†’ Dashboard CSV â†’ AI Summaries &amp; PDFs.
             This hub is a lightweight alternative for direct submission via Apps Script.
           </div>
 
@@ -957,7 +958,7 @@
 
     <!-- OPENAI ASSISTANT -->
     <div id="openai" class="section">
-      <h2>AI Assistant (OpenAI) – ProMEL Reasoning &amp; MEL Outputs</h2>
+      <h2>AI Assistant (OpenAI) â€“ ProMEL Reasoning &amp; MEL Outputs</h2>
       <p>
         Use this assistant for <strong>any MEL-related request</strong>: reports, survey tools, indicator design, logframes,
         evaluation TORs, risk registers, summaries, recommendations, and data interpretation.
@@ -1060,10 +1061,10 @@
   // CONFIG
   // =====================================================
 
-  // ✅ AI backend endpoint (Railway)
+  // âœ… AI backend endpoint (Railway)
   const AI_API_URL = "https://promel-ai-backend-production.up.railway.app/api/pas-ai-chat";
 
-  // ✅ OPTIONAL: Apps Script Web App endpoints for direct submission from Field Reporting Hub.
+  // âœ… OPTIONAL: Apps Script Web App endpoints for direct submission from Field Reporting Hub.
   // If blank, Field Reporting Hub runs in DEMO mode (no write).
   const MONITORING_APPS_SCRIPT_URL = ""; // e.g. https://script.google.com/macros/s/XXXX/exec
   const EVALUATION_APPS_SCRIPT_URL = ""; // e.g. https://script.google.com/macros/s/XXXX/exec
@@ -1679,10 +1680,10 @@
       const act  = idxActions    !== -1 ? (row[idxActions]    || '') : '';
 
       li.innerHTML = `
-        <strong>${escapeHtml(project)}</strong> – ${escapeHtml(period)}<br>
-        ✅ ${escapeHtml(ach)}<br>
-        ⚠️ ${escapeHtml(chal)}<br>
-        📌 ${escapeHtml(act)}
+        <strong>${escapeHtml(project)}</strong> â€“ ${escapeHtml(period)}<br>
+        âœ… ${escapeHtml(ach)}<br>
+        âš ï¸ ${escapeHtml(chal)}<br>
+        ðŸ“Œ ${escapeHtml(act)}
       `;
       list.appendChild(li);
     });
@@ -1752,7 +1753,7 @@
       data: {
         labels: ratingLabels,
         datasets: [{
-          label: 'Average Rating (1–5)',
+          label: 'Average Rating (1â€“5)',
           data: theRatingData
         }]
       },
@@ -1915,8 +1916,8 @@
         labels,
         datasets: [{
           label: groupMode === "month"
-            ? "Avg Overall Rating by Month (1–5)"
-            : "Avg Overall Rating by Period (1–5)",
+            ? "Avg Overall Rating by Month (1â€“5)"
+            : "Avg Overall Rating by Period (1â€“5)",
           data: overallAvg
         }]
       },
@@ -1988,7 +1989,7 @@
       data: {
         labels,
         datasets: [{
-          label: "Average Evaluation Rating (1–5)",
+          label: "Average Evaluation Rating (1â€“5)",
           data: avgs
         }]
       },
@@ -2634,85 +2635,56 @@
     try { return JSON.parse(unfenced); } catch { return null; }
   }
 
-  // =====================================================
-  // AI ASSISTANT (Flexible MEL) — calls Railway backend
-  // =====================================================
+<script>
+  // === Add/keep your AI_API_URL constant ===
+  // const AI_API_URL = "https://promel-ai-backend-production.up.railway.app/api/pas-ai-chat";
+
   async function sendToAIAssistant() {
-    const modeEl = document.getElementById('ai-mode');
-    const typeEl = document.getElementById('ai-response-type');
-    const promptEl = document.getElementById('ai-prompt');
-    const includeFiltersEl = document.getElementById('ai-include-filters');
+    const mode = document.getElementById('ai-mode')?.value || 'custom';
+    const respType = document.getElementById('ai-response-type')?.value || 'both';
+    const prompt = (document.getElementById('ai-prompt')?.value || '').trim();
+    const includeFilters = document.getElementById('ai-include-filters')?.checked ?? true;
+
     const statusEl = document.getElementById('ai-status');
     const responseBox = document.getElementById('ai-response-box');
-
     const buttonEl = document.querySelector('#openai .ai-input-panel button');
-
-    const mode = modeEl ? modeEl.value : 'custom';
-    const respType = typeEl ? typeEl.value : 'json';
-    const prompt = (promptEl ? promptEl.value : '').trim();
-    const includeFilters = includeFiltersEl ? includeFiltersEl.checked : true;
 
     if (!prompt) { alert('Please enter a prompt or question for the AI assistant.'); return; }
 
+    // current filters
     const project = document.getElementById('filter-project')?.value || '';
     const period = document.getElementById('filter-period')?.value || '';
     const location = document.getElementById('filter-location')?.value || '';
 
-    const monitorForView = monitoringFilteredRows.length ? monitoringFilteredRows : monitoringRows;
-    const evalForView = evaluationFilteredRows.length ? evaluationFilteredRows : evaluationRows;
+    // use filtered rows if present
+    const monitorForView = (typeof monitoringFilteredRows !== 'undefined' && monitoringFilteredRows.length) ? monitoringFilteredRows : (monitoringRows || []);
+    const evalForView = (typeof evaluationFilteredRows !== 'undefined' && evaluationFilteredRows.length) ? evaluationFilteredRows : (evaluationRows || []);
 
+    // Build small samples (not full datasets)
     const monitoringObjects = rowsToObjects(monitorForView);
     const evaluationObjects = rowsToObjects(evalForView);
 
-    const monitoring_sample = takeLastN(monitoringObjects, 8);
-    const evaluation_sample = takeLastN(evaluationObjects, 8);
+    const monitoring_sample = takeLastN(monitoringObjects, 12);
+    const evaluation_sample = takeLastN(evaluationObjects, 12);
 
     const kpi_snapshot = buildKpiSnapshot();
 
-    const aiInstructionJson = `
-Return STRICT JSON (no markdown) using this schema:
-
-{
-  "title": "string",
-  "narrative": "string (short paragraphs + bullets, readable)",
-  "outputs": ["string", "..."], 
-  "key_findings": ["string", "..."],
-  "recommendations": ["string", "..."],
-  "visuals": {
-    "kpi_scores": [{"label":"string","percent":number}, ...],
-    "distribution": {"good":number,"watch":number,"poor":number}
-  }
-}
-
-Rules:
-- Support ANY MEL request: reports, survey questions, indicators, logframes, evaluation TORs, risk registers, donor narrative, summaries.
-- Use monitoring_sample and evaluation_sample narrative fields where helpful.
-- If visuals are relevant, include kpi_scores and distribution. If not relevant, return empty arrays and zeros.
-- Keep outputs practical and ready-to-use.
-`.trim();
-
-    const aiInstructionText = `
-Return a clear, structured answer (no JSON required).
-Support ANY MEL request: reports, survey questions, indicators, logframes, evaluation TORs, risk registers, donor narrative, summaries.
-Use monitoring_sample and evaluation_sample narrative fields where helpful.
-Keep it practical and ready-to-use.
-`.trim();
-
+    // ✅ Send clean request to backend — backend enforces structure + JSON
     const payload = {
-      message: `[Mode: ${mode}] ${prompt}\n\n${respType === "text" ? aiInstructionText : aiInstructionJson}`,
-      filters: includeFilters ? { project, period, location } : {},
-      kpi_snapshot: includeFilters ? kpi_snapshot : {},
-      monitoring_sample: includeFilters ? monitoring_sample : [],
-      evaluation_sample: includeFilters ? evaluation_sample : [],
-      response_format: respType
+      user_query: prompt,
+      mode,
+      response_format: respType, // "text" | "json" | "both"
+      context: {
+        filters: includeFilters ? { project, period, location } : {},
+        kpi_snapshot: includeFilters ? kpi_snapshot : {},
+        monitoring_sample: includeFilters ? monitoring_sample : [],
+        evaluation_sample: includeFilters ? evaluation_sample : []
+      }
     };
 
-    if (statusEl) statusEl.textContent = 'ProMEL AI is analysing your request…';
+    if (statusEl) statusEl.textContent = 'ProMEL AI is analysing your request...';
     if (responseBox) responseBox.textContent = '';
-    if (buttonEl) {
-      buttonEl.disabled = true;
-      buttonEl.textContent = 'Thinking…';
-    }
+    if (buttonEl) { buttonEl.disabled = true; buttonEl.textContent = 'Thinking...'; }
 
     try {
       const res = await fetch(AI_API_URL, {
@@ -2721,73 +2693,58 @@ Keep it practical and ready-to-use.
         body: JSON.stringify(payload)
       });
 
-      let data;
-      try { data = await res.json(); }
-      catch { throw new Error('Could not read AI response (invalid JSON from backend).'); }
+      const data = await res.json().catch(() => null);
+      if (!data) throw new Error('Backend returned invalid JSON.');
 
-      if (!res.ok) {
-        const apiError = data?.error || `HTTP ${res.status}`;
+      if (!res.ok || !data.success) {
+        const msg = data?.error || `Server error (HTTP ${res.status})`;
         if (statusEl) statusEl.textContent = 'Error from ProMEL AI backend.';
-        if (responseBox) responseBox.textContent = apiError;
+        if (responseBox) responseBox.textContent = msg;
         renderAiVisuals({});
         return;
       }
 
-      if (data.success) {
-        const rawReply = data.reply || '';
+      // ✅ New backend contract:
+      // data.reply_text (always)
+      // data.reply_structured (optional)
+      // data.visuals (always present object)
+      const replyText = (data.reply_text || '').trim();
+      const structured = data.reply_structured || null;
 
-        if (respType === "text") {
-          if (responseBox) responseBox.textContent = rawReply || '(No reply text returned)';
-          if (statusEl) statusEl.textContent = 'AI output generated (text).';
-          renderAiVisuals({});
-          return;
-        }
-
-        const parsed = tryParseJson(rawReply);
-
-        if (parsed) {
-          const title = parsed.title ? `# ${parsed.title}\n\n` : '';
-          const outputs = Array.isArray(parsed.outputs) && parsed.outputs.length
-            ? `## Outputs\n- ${parsed.outputs.join('\n- ')}\n\n`
-            : '';
-          const findings = Array.isArray(parsed.key_findings) && parsed.key_findings.length
-            ? `## Key Findings\n- ${parsed.key_findings.join('\n- ')}\n\n`
-            : '';
-          const recs = Array.isArray(parsed.recommendations) && parsed.recommendations.length
-            ? `## Recommendations\n- ${parsed.recommendations.join('\n- ')}\n\n`
-            : '';
-
-          let narrative = (title + (parsed.narrative || '') + '\n\n' + outputs + findings + recs).trim();
-
-          if (respType === "both") {
-            narrative += `\n\n---\n(Structured data received for visuals.)`;
-          }
-
-          if (responseBox) responseBox.textContent = narrative || '(No narrative returned)';
-          renderAiVisuals(parsed.visuals || data.visuals || {});
-          if (statusEl) statusEl.textContent = 'AI output + visuals generated.';
+      // Render narrative text
+      if (responseBox) {
+        if (respType === "json" && structured) {
+          // show structured in readable format
+          const title = structured.title ? `# ${structured.title}\n\n` : '';
+          const narrative = structured.narrative ? `${structured.narrative}\n\n` : '';
+          const outputs = Array.isArray(structured.outputs) && structured.outputs.length ? `## Outputs\n- ${structured.outputs.join('\n- ')}\n\n` : '';
+          const findings = Array.isArray(structured.key_findings) && structured.key_findings.length ? `## Key Findings\n- ${structured.key_findings.join('\n- ')}\n\n` : '';
+          const recs = Array.isArray(structured.recommendations) && structured.recommendations.length ? `## Recommendations\n- ${structured.recommendations.join('\n- ')}\n\n` : '';
+          responseBox.textContent = (title + narrative + outputs + findings + recs).trim() || replyText || '(No output)';
         } else {
-          if (responseBox) responseBox.textContent = rawReply || '(No reply text returned)';
-          renderAiVisuals(data.visuals || {});
-          if (statusEl) statusEl.textContent = 'AI response received (text fallback).';
+          // "text" or "both"
+          responseBox.textContent = replyText || '(No output returned)';
+          if (respType === "both" && structured) {
+            responseBox.textContent += `\n\n---\n(Structured data also produced for visuals.)`;
+          }
         }
-      } else {
-        if (statusEl) statusEl.textContent = 'AI error: ' + (data.error || 'Unknown error from backend');
-        if (responseBox) responseBox.textContent = '';
-        renderAiVisuals({});
       }
+
+      // Render visuals
+      renderAiVisuals(data.visuals || {});
+      if (statusEl) statusEl.textContent = 'AI response generated successfully.';
+
     } catch (err) {
-      console.error('Error calling ProMEL AI endpoint:', err);
-      if (statusEl) statusEl.textContent = 'Network or backend error. Please try again.';
+      console.error(err);
+      if (statusEl) statusEl.textContent = 'Network/backend error. Please try again.';
       if (responseBox) responseBox.textContent = err.message || String(err);
       renderAiVisuals({});
     } finally {
-      if (buttonEl) {
-        buttonEl.disabled = false;
-        buttonEl.textContent = 'Ask ProMEL AI';
-      }
+      if (buttonEl) { buttonEl.disabled = false; buttonEl.textContent = 'Ask ProMEL AI'; }
     }
   }
+</script>
+
 
   // =====================================================
   // FIELD REPORTING HUB
@@ -2814,7 +2771,7 @@ Keep it practical and ready-to-use.
 
   function refreshAllData() {
     const el = document.getElementById("hub-sync-status");
-    if (el) el.textContent = "Refreshing data…";
+    if (el) el.textContent = "Refreshing dataâ€¦";
     loadMonitoringTable();
     loadEvaluationTable();
     setTimeout(() => {
@@ -2881,14 +2838,14 @@ Keep it practical and ready-to-use.
       actions: act
     };
 
-    setHubStatus("hub-mon-status", "Submitting…");
+    setHubStatus("hub-mon-status", "Submittingâ€¦");
 
     try {
       if (!MONITORING_APPS_SCRIPT_URL) {
-        setHubStatus("hub-mon-status", "DEMO mode: submission captured locally (no Apps Script URL set). Refreshing dashboard…");
+        setHubStatus("hub-mon-status", "DEMO mode: submission captured locally (no Apps Script URL set). Refreshing dashboardâ€¦");
       } else {
         await postToAppsScript(MONITORING_APPS_SCRIPT_URL, payload);
-        setHubStatus("hub-mon-status", "Submitted to Monitoring Sheet successfully. Refreshing dashboard…");
+        setHubStatus("hub-mon-status", "Submitted to Monitoring Sheet successfully. Refreshing dashboardâ€¦");
       }
 
       refreshAllData();
@@ -2946,14 +2903,14 @@ Actions: ${act}
       recommendations: recs
     };
 
-    setHubStatus("hub-ev-status", "Submitting…");
+    setHubStatus("hub-ev-status", "Submittingâ€¦");
 
     try {
       if (!EVALUATION_APPS_SCRIPT_URL) {
-        setHubStatus("hub-ev-status", "DEMO mode: submission captured locally (no Apps Script URL set). Refreshing dashboard…");
+        setHubStatus("hub-ev-status", "DEMO mode: submission captured locally (no Apps Script URL set). Refreshing dashboardâ€¦");
       } else {
         await postToAppsScript(EVALUATION_APPS_SCRIPT_URL, payload);
-        setHubStatus("hub-ev-status", "Submitted to Evaluation Sheet successfully. Refreshing dashboard…");
+        setHubStatus("hub-ev-status", "Submitted to Evaluation Sheet successfully. Refreshing dashboardâ€¦");
       }
 
       refreshAllData();
@@ -3003,3 +2960,4 @@ Recommendations: ${recs}
 
 </body>
 </html>
+
